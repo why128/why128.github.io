@@ -74,13 +74,34 @@
             min-height: 80vh;
             backdrop-filter: blur(10px);
         }
-        h1 {
+        .avatar-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .avatar {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .avatar:hover {
+            transform: scale(1.05);
+        }
+        .name {
             font-size: 2.5em;
             color: #000;
-            margin-bottom: 10px;
-            text-align: center;
+            margin: 15px 0 10px 0;
             border-bottom: 2px solid #ccc;
             padding-bottom: 10px;
+            display: inline-block;
+        }
+        .subtitle {
+            font-style: italic;
+            color: #666;
+            margin: 0;
         }
         h2 {
             font-size: 1.5em;
@@ -217,6 +238,13 @@
                 margin-left: 0;
                 max-width: 100%;
             }
+            .avatar {
+                width: 150px;
+                height: 150px;
+            }
+            .name {
+                font-size: 2em;
+            }
             .timeline::after {
                 left: 31px;
             }
@@ -253,9 +281,12 @@
         <div class="container">
             <!-- 基本资料 -->
             <section id="basic" class="section active">
-                <h1>王海滢</h1>
-                <p style="text-align: center; font-style: italic; color: #666;">软件工程师 | 创新者 | 终身学习者</p>
-                <h2>个人简介</h2>
+                <div class="avatar-section">
+                    <img src="./src/images/head.jpg" alt="王海滢" class="avatar">
+                    <div class="name">王海滢</div>
+                    <p class="subtitle">软件工程师 | 创新者 | 终身学习者</p>
+                </div>
+                <h2>个人介绍</h2>
                 <p>
                     我是一名资深软件工程师，拥有超过5年的开发经验，专注于Web技术和人工智能应用。热爱开源社区，积极参与技术分享和项目协作。致力于通过技术解决实际问题，推动数字化转型。
                 </p>
