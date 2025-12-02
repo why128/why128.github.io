@@ -1,0 +1,48 @@
+name: Deploy to GitHub Pages  # 工作流名称
+
+on:  # 触发条件：推送到 main 分支时自动运行
+  push:
+    branches: [ main ]  # 或您的默认分支，如 master
+
+permissions:  # 权限设置（Actions 需访问仓库）
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:  # 任务名称
+    runs-on: ubuntu-latest  # 运行环境
+    steps:
+      - name: Checkout  # 检出代码
+        uses: actions/checkout@v4  # 最新版本
+
+      - name: Setup Node.js  # 设置 Node 环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'  # 或您的 Node 版本，如 18
+          cache: 'npm'  # 缓存 npm 依赖加速
+
+      - name: Install dependencies  # 安装依赖
+        run: npm ci  # 或 npm install（ci 更适合 CI）
+
+      - name: Build  # 构建项目
+        run: npm run build  # 您的构建命令，确保输出到 dist/
+
+      - name: Setup Pages  # 设置 Pages（可选，如果用 gh-pages 分支）
+        id: deployment
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact  # 上传构建产物（可选，用于 Pages 部署）
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist  # 指定 dist/ 作为 artifact
+
+      - name: Deploy to GitHub Pages  # 部署到 gh-pages 分支
+        uses: peaceiris/actions-gh-pages@v4  # 最新版本（v3 也可，但 v4 更稳定）
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}  # 使用 GitHub Token
+          publish_dir: ./dist  # 关键：将 dist/ 内容发布到 gh-pages 根目录
+          publish_branch: gh-pages  # 目标分支（可选，默认 gh-pages）
+          user_name: 'github-actions[bot]'  # 作者名
+          user_email: 'github-actions[bot]@users.noreply.github.com'  # 作者邮箱
+          commit_message: 'Deploy: Update site'  # 提交消息

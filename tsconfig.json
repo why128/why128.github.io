@@ -1,0 +1,28 @@
+{
+    "extends": "@tsconfig/svelte/tsconfig.json", // Svelte 官方 TS 配置（需安装 @tsconfig/svelte）
+    "compilerOptions": {
+        "target": "ES2022", // Node 24 兼容
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "strict": true, // 启用严格模式
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true,
+        "allowSyntheticDefaultImports": true,
+        "baseUrl": ".",
+        "paths": {
+            "$lib/*": [
+                "src/lib/*"
+            ] // Svelte 别名，支持 import from '$lib'
+        }
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.svelte"
+    ],
+    "exclude": [
+        "node_modules/*",
+        "dist/*"
+    ]
+}
