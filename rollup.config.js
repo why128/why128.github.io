@@ -7,6 +7,8 @@ import terser from '@rollup/plugin-terser';
 import deleteAsync from 'rollup-plugin-delete';  // 清理 dist
 import html2 from 'rollup-plugin-html2';  // 使用 html2
 import pkg from './package.json' with { type: 'json' };  // 版本读取
+import postcss from 'rollup-plugin-postcss';  // 新增：处理 CSS 导入   
+import alias from '@rollup/plugin-alias';  // 新增：路径别名插件
 
 export default {
     input: 'src/main.ts',  // TS 入口：打包 JS
@@ -18,6 +20,11 @@ export default {
         name: 'app'
     },
     plugins: [
+        alias({  // 新增：配置 @ 别名为 src/ 根目录
+            entries: [
+                { find: '@', replacement: 'src/' }  // @/xxx 解析为 src/xxx
+            ]
+        }),
         deleteAsync({ targets: ['dist/*'] }),  // 清理 dist
         svelte({
             compilerOptions: {
@@ -25,6 +32,11 @@ export default {
             },
             preprocess: preprocess(),
             emitCss: false
+        }),
+        postcss({  // 修复：移除 use，让 postcss.config.js 处理
+            extract: false,  // 内联 CSS 到 JS
+            minimize: true,  // 压缩（cssnano 在 config 中添加）
+            config: { path: './postcss.config.js' }  // 显式 PostCSS 配置
         }),
         typescript({
             tsconfig: './tsconfig.json',

@@ -1,0 +1,32 @@
+/* src/common/css/public.css */
+body {
+    font-family: Arial, sans-serif;
+}
+
+/* 全局重置与基础 */
+:global(body) {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+        "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+:global(*) {
+    box-sizing: border-box;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 15px;
+    }
+}
