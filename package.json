@@ -1,0 +1,24 @@
+{
+  "name": "why128.github.io",
+  "version": "0.0.1",
+  "description": "why128's blog",
+  "keywords": [
+    "why128",
+    "blog"
+  ],
+  "homepage": "https://github.com/why128/why128.github.io#readme",
+  "bugs": {
+    "url": "https://github.com/why128/why128.github.io/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/why128/why128.github.io.git"
+  },
+  "license": "ISC",
+  "author": "why128",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
