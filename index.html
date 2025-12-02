@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人介绍 - 王海滢</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 50%, #f5f5f5 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        .sidebar {
+            width: 250px;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px 0;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+        }
+        .nav-tab {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .nav-tab li {
+            margin-bottom: 1px;
+        }
+        .nav-tab a {
+            display: block;
+            padding: 15px 20px;
+            color: #666;
+            text-decoration: none;
+            border-left: 4px solid transparent;
+            transition: all 0.3s;
+        }
+        .nav-tab a:hover,
+        .nav-tab a.active {
+            background-color: #e9e9e9;
+            color: #000;
+            border-left-color: #333;
+        }
+        .main-content {
+            margin-left: 250px;
+            flex: 1;
+            padding: 40px;
+            max-width: calc(100% - 250px);
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            min-height: 80vh;
+            backdrop-filter: blur(10px);
+        }
+        .avatar-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .avatar {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .avatar:hover {
+            transform: scale(1.05);
+        }
+        .name {
+            font-size: 2.5em;
+            color: #000;
+            margin: 15px 0 10px 0;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+        .subtitle {
+            text-align: center;
+            font-style: italic;
+            color: #666;
+            margin: 0;
+        }
+        h2 {
+            font-size: 1.5em;
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-left: 4px solid #666;
+            padding-left: 10px;
+        }
+        p {
+            font-size: 1.1em;
+            text-align: justify;
+            margin-bottom: 20px;
+        }
+        .social-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .social-item {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            width: 200px;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+        .social-item:hover {
+            background-color: #e9e9e9;
+        }
+        .platform {
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .handle {
+            font-family: monospace;
+            color: #000;
+            font-size: 1.2em;
+        }
+        .timeline {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            background-color: #ccc;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -3px;
+        }
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            background-color: inherit;
+            width: 50%;
+        }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            right: -17px;
+            background-color: #fff;
+            border: 4px solid #666;
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .left {
+            left: 0;
+        }
+        .right {
+            left: 50%;
+        }
+        .right::after {
+            left: -16px;
+        }
+        .timeline-content {
+            padding: 20px 30px;
+            background-color: #f9f9f9;
+            position: relative;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .skill-item {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .skill-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .skill-level {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .footer {
+            text-align: center;
+            color: #999;
+            font-size: 0.9em;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                height: auto;
+            }
+            .main-content {
+                margin-left: 0;
+                max-width: 100%;
+            }
+            .avatar {
+                width: 150px;
+                height: 150px;
+            }
+            .name {
+                font-size: 2em;
+            }
+            .timeline::after {
+                left: 31px;
+            }
+            .timeline-item {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+            .timeline-item::after {
+                left: 15px;
+            }
+            .right {
+                left: 0%;
+            }
+            .right::after {
+                left: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="sidebar">
+        <ul class="nav-tab">
+            <li><a href="#" onclick="showSection('basic')" class="active">基本资料</a></li>
+            <li><a href="#" onclick="showSection('timeline')">人生历程</a></li>
+            <li><a href="#" onclick="showSection('social')">社交账号</a></li>
+            <li><a href="#" onclick="showSection('skills')">个人能力</a></li>
+            <li><a href="#" onclick="showSection('projects')">项目经验</a></li>
+            <li><a href="#" onclick="showSection('contact')">联系方式</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <!-- 基本资料 -->
+            <section id="basic" class="section active">
+                <div class="avatar-section">
+                    <img src="src/images/head.jpg" alt="王海滢" class="avatar">
+                    <!-- <div class="name">王海滢</div> -->
+                    <p class="subtitle">软件工程师 | 创新者 | 终身学习者</p>
+                </div>
+                <h2>个人介绍</h2>
+                <p>
+                    我是一名资深软件工程师，拥有超过15年的开发经验，专注于Web技术和人工智能应用。热爱开源社区，积极参与技术分享和项目协作。致力于通过技术解决实际问题，推动数字化转型。
+                </p>
+                <h2>基本信息</h2>
+                <ul style="font-size: 1.1em; list-style: none; padding: 0;">
+                    <li style="margin-bottom: 10px;"><strong>姓名：</strong> 王海滢</li>
+                    <li style="margin-bottom: 10px;"><strong>年龄：</strong> 30岁</li>
+                    <li style="margin-bottom: 10px;"><strong>地点：</strong> 北京市</li>
+                    <li style="margin-bottom: 10px;"><strong>邮箱：</strong> 暂无</li>
+                    <li style="margin-bottom: 10px;"><strong>电话：</strong> 暂无</li>
+                </ul>
+            </section>
+
+            <!-- 人生历程 -->
+            <section id="timeline" class="section">
+                <h1>人生历程</h1>
+                <div class="timeline">
+                    <div class="timeline-item left">
+                        <div class="timeline-content">
+                            <h3>2010 - 高中毕业</h3>
+                            <p>就读于北京市第一中学，成绩优异，获得全国数学竞赛一等奖。</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item right">
+                        <div class="timeline-content">
+                            <h3>2014 - 大学毕业</h3>
+                            <p>清华大学计算机科学与技术专业学士学位，主修人工智能方向。</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item left">
+                        <div class="timeline-content">
+                            <h3>2016 - 入职第一家公司</h3>
+                            <p>加入阿里巴巴集团，作为前端开发工程师，开始职业生涯。</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item right">
+                        <div class="timeline-content">
+                            <h3>2020 - 晋升高级工程师</h3>
+                            <p>领导多个AI项目，获得公司内部创新奖。</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item left">
+                        <div class="timeline-content">
+                            <h3>2025 - 当前</h3>
+                            <p>独立开发者，专注于开源项目和个人博客。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 社交账号 -->
+            <section id="social" class="section">
+                <h1>社交账号</h1>
+                <h2>在线存在</h2>
+                <div class="social-section">
+                    <div class="social-item">
+                        <div class="platform">X (Twitter)</div>
+                        <div class="handle">@wattley128</div>
+                    </div>
+                    <div class="social-item">
+                        <div class="platform">微博</div>
+                        <div class="handle">@王海滢</div>
+                    </div>
+                    <div class="social-item">
+                        <div class="platform">LinkedIn</div>
+                        <div class="handle">暂无</div>
+                    </div>
+                    <div class="social-item">
+                        <div class="platform">GitHub</div>
+                        <div class="handle">why128</div>
+                    </div>
+                    <div class="social-item">
+                        <div class="platform">知乎</div>
+                        <div class="handle">暂无</div>
+                    </div>
+                    <div class="social-item">
+                        <div class="platform">Bilibili</div>
+                        <div class="handle">暂无</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 个人能力 -->
+            <section id="skills" class="section">
+                <h1>个人能力</h1>
+                <h2>技术技能</h2>
+                <div class="skills-grid">
+                    <div class="skill-item">
+                        <div class="skill-name">JavaScript</div>
+                        <div class="skill-level">高级 | 15年经验</div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">Python</div>
+                        <div class="skill-level">高级 | AI/ML 专精</div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">React</div>
+                        <div class="skill-level">熟练 | 前端框架</div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">Node.js</div>
+                        <div class="skill-level">中级 | 后端开发</div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">Docker</div>
+                        <div class="skill-level">熟练 | 容器化</div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">AWS</div>
+                        <div class="skill-level">基础 | 云服务</div>
+                    </div>
+                </div>
+                <h2>软技能</h2>
+                <p>团队协作、问题解决、创新思维、沟通表达。</p>
+            </section>
+
+            <!-- 项目经验 -->
+            <section id="projects" class="section">
+                <h1>项目经验</h1>
+                <h2>主要项目</h2>
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #ddd;">
+                        <h3>AI聊天机器人</h3>
+                        <p>使用Python和TensorFlow开发的企业级聊天机器人，支持多语言交互。部署于AWS云平台，日活跃用户超10万。</p>
+                        <p><strong>角色：</strong> 架构师 & 核心开发者 | <strong>时间：</strong> 2023-2025</p>
+                    </div>
+                    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #ddd;">
+                        <h3>Web应用仪表盘</h3>
+                        <p>基于React和Node.js构建的实时数据可视化仪表盘，用于企业内部监控。</p>
+                        <p><strong>角色：</strong> 前端领队 | <strong>时间：</strong> 2020-2022</p>
+                    </div>
+                    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #ddd;">
+                        <h3>开源贡献</h3>
+                        <p>参与GitHub上多个AI工具库的维护，累计提交超过200次。</p>
+                        <p><strong>角色：</strong> 贡献者 | <strong>时间：</strong> 2018至今</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 联系方式 -->
+            <section id="contact" class="section">
+                <h1>联系方式</h1>
+                <h2>获取联系</h2>
+                <p style="text-align: center; font-size: 1.2em;">
+                    欢迎通过以下方式与我联系，期待合作机会！
+                </p>
+                <ul style="font-size: 1.1em; list-style: none; padding: 0; text-align: center;">
+                    <li style="margin-bottom: 10px;"><strong>邮箱：</strong> 暂无</li>
+                    <li style="margin-bottom: 10px;"><strong>电话：</strong> 暂无</li>
+                    <li style="margin-bottom: 10px;"><strong>微信：</strong> 暂无</li>
+                    <li style="margin-bottom: 10px;"><strong>地址：</strong> 北京市朝阳区科技园</li>
+                </ul>
+            </section>
+
+            <footer class="footer">
+                <p>&copy; 2025 王海滢. 所有权利保留。</p>
+            </footer>
+        </div>
+    </main>
+
+    <script>
+        function showSection(sectionId) {
+            // 隐藏所有section
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(sec => sec.classList.remove('active'));
+            
+            // 显示选中的section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // 更新导航高亮
+            const links = document.querySelectorAll('.nav-tab a');
+            links.forEach(link => link.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
