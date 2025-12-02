@@ -1,8 +1,8 @@
-name: Build and Deploy to Master
+name: Build and Deploy Dist to Master
 
 on:
   push:
-    branches: [ gh-pages ]  # 触发条件：push 到 gh-pages 分支
+    branches: [ gh-pages ]
 
 jobs:
   build:
@@ -11,20 +11,23 @@ jobs:
       - name: Checkout gh-pages branch
         uses: actions/checkout@v4
         with:
-          ref: gh-pages  # 明确检出 gh-pages 分支
-          token: ${{ secrets.GITHUB_TOKEN }}  # 授予 push 权限
+          ref: gh-pages
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24.11.0'  # 根据你的项目调整 Node 版本
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci  # 使用 ci 确保一致性
+        run: npm ci
 
       - name: Run build
-        run: npm run build  # 运行构建，输出到 dist 文件夹
+        run: npm run build
+
+      - name: Debug build output (remove after testing)
+        run: ls -la dist/ || echo "dist not found"
 
       - name: Deploy dist to master branch
         run: |
@@ -32,21 +35,50 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
-          # 检出 master 分支（如果不存在，创建）
+          # 备份 dist 到临时目录（避免 checkout 冲突）
+          mkdir -p /tmp/dist
+          if [ -d "dist" ]; then
+            cp -r dist/* /tmp/dist/ || true
+            echo "Backed up dist to /tmp/dist"
+          else
+            echo "dist not found - failing"
+            exit 1
+          fi
+
+          # 清理本地变更（discard build artifacts）
+          rm -rf dist/
+          git clean -fd || true  # 移除 untracked（不影响 .git）
+
+          # 检出 master 分支（现在无冲突）
           git fetch origin
           git checkout master || git checkout -b master
+          echo "Switched to master branch"
 
-          # 清理旧 dist 文件（可选，避免残留）
-          git rm -rf . || true
+          # 清理 master 根目录（移除旧文件，保留 .git）
+          git rm -rf . --ignore-unmatch || true
+          git clean -fdx -e .git || true
+          echo "Cleaned master directory"
 
-          # 复制 dist 内容到根目录
-          cp -r dist/* . || true
+          # 从临时目录复制 dist 内容到 master 根目录
+          if [ -d "/tmp/dist" ] && [ "$(ls -A /tmp/dist)" ]; then
+            cp -r /tmp/dist/* . || true
+            echo "Copied dist contents to master"
+          else
+            echo "No dist contents to copy - failing"
+            exit 1
+          fi
 
           # 添加所有文件
           git add .
 
-          # 仅在有变化时 commit
-          git diff --staged --quiet || git commit -m "chore: update dist from build [skip ci]"
+          # 仅在有变化时 commit/push
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update dist from gh-pages build [skip ci]"
+            git push origin master
+            echo "Pushed changes to master"
+          fi
 
-          # Push 到 master
-          git push origin master
+          # 清理临时目录
+          rm -rf /tmp/dist
