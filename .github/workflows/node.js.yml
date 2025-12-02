@@ -1,8 +1,8 @@
-name: Build and Deploy to Master
+name: Build and Deploy Dist to Master
 
 on:
   push:
-    branches: [ gh-pages ]  # 触发条件：push 到 gh-pages 分支
+    branches: [ gh-pages ]  # 仅 gh-pages push 触发，避免干扰
 
 jobs:
   build:
@@ -11,20 +11,20 @@ jobs:
       - name: Checkout gh-pages branch
         uses: actions/checkout@v4
         with:
-          ref: gh-pages  # 明确检出 gh-pages 分支
-          token: ${{ secrets.GITHUB_TOKEN }}  # 授予 push 权限
+          ref: gh-pages  # 检出开发分支（源代码）
+          token: ${{ secrets.GITHUB_TOKEN }}  # 授予 push 权限到 master
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24.11.0'  # 根据你的项目调整 Node 版本
+          node-version: '20'  # 调整为你的 Node 版本
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci  # 使用 ci 确保一致性
+        run: npm ci  # 需要 package-lock.json 已提交到 gh-pages
 
       - name: Run build
-        run: npm run build  # 运行构建，输出到 dist 文件夹
+        run: npm run build  # 生成 dist/（仅构建产物）
 
       - name: Deploy dist to master branch
         run: |
@@ -32,21 +32,24 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
-          # 检出 master 分支（如果不存在，创建）
+          # 检出 master 分支（创建如果不存在）
           git fetch origin
           git checkout master || git checkout -b master
 
-          # 清理旧 dist 文件（可选，避免残留）
-          git rm -rf . || true
+          # 清理 master 根目录所有文件（保留 .git 隐含文件如 README.md 如果需要；否则全清）
+          git rm -rf . --ignore-unmatch || true  # 忽略未跟踪文件错误
+          rm -rf * .[^.]*  # 移除所有可见/隐藏文件（安全清理）
 
-          # 复制 dist 内容到根目录
-          cp -r dist/* . || true
+          # 复制 dist 内容到 master 根目录（覆盖/新建）
+          cp -r dist/* . || true  # 忽略空 dist 错误
 
-          # 添加所有文件
+          # 添加所有文件到 staging
           git add .
 
-          # 仅在有变化时 commit
-          git diff --staged --quiet || git commit -m "chore: update dist from build [skip ci]"
-
-          # Push 到 master
-          git push origin master
+          # 仅在有变化时 commit（避免空 commit）
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update dist from gh-pages build [skip ci]"
+            git push origin master
+          fi
