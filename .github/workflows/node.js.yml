@@ -1,33 +1,52 @@
-name: Build and Deploy Dist
+name: Build and Deploy to Master
 
 on:
   push:
-    branches: [ gh-pages ]
+    branches: [ gh-pages ]  # 触发条件：push 到 gh-pages 分支
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
         with:
+          ref: gh-pages  # 明确检出 gh-pages 分支
           token: ${{ secrets.GITHUB_TOKEN }}  # 授予 push 权限
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24.11.0'  # 根据你的项目调整 Node 版本
+          node-version: '20'  # 根据你的项目调整 Node 版本
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci  # 使用 ci 而非 install 以确保一致性
+        run: npm ci  # 使用 ci 确保一致性
 
       - name: Run build
-        run: npm run build  # 运行你的构建脚本，输出到 dist 文件夹
+        run: npm run build  # 运行构建，输出到 dist 文件夹
 
-      - name: Commit and push dist changes
+      - name: Deploy dist to master branch
         run: |
-          git config --local user.email "xxxx@xxx.com"
-          git config --local user.name "why128"
-          git add dist/** || true  # 添加 dist 所有文件（忽略无变化）
-          git diff --staged --quiet || git commit -m "chore: update build [skip ci]"  # 只在有变化时 commit，使用 [skip ci] 避免循环触发
-          git push
+          # 配置 Git
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          # 检出 master 分支（如果不存在，创建）
+          git fetch origin
+          git checkout master || git checkout -b master
+
+          # 清理旧 dist 文件（可选，避免残留）
+          git rm -rf . || true
+
+          # 复制 dist 内容到根目录
+          cp -r dist/* . || true
+
+          # 添加所有文件
+          git add .
+
+          # 仅在有变化时 commit
+          git diff --staged --quiet || git commit -m "chore: update dist from build [skip ci]"
+
+          # Push 到 master
+          git push origin master
