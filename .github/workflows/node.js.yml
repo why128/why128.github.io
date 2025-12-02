@@ -26,9 +26,8 @@ jobs:
       - name: Run build
         run: npm run build
 
-      - name: Debug build output (optional, remove after testing)
-        run: |
-          ls -la dist/ || echo "dist not found or empty"
+      - name: Debug build output (remove after testing)
+        run: ls -la dist/ || echo "dist not found"
 
       - name: Deploy dist to master branch
         run: |
@@ -36,32 +35,50 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
-          # 检出 master 分支（创建如果不存在）
+          # 备份 dist 到临时目录（避免 checkout 冲突）
+          mkdir -p /tmp/dist
+          if [ -d "dist" ]; then
+            cp -r dist/* /tmp/dist/ || true
+            echo "Backed up dist to /tmp/dist"
+          else
+            echo "dist not found - failing"
+            exit 1
+          fi
+
+          # 清理本地变更（discard build artifacts）
+          rm -rf dist/
+          git clean -fd || true  # 移除 untracked（不影响 .git）
+
+          # 检出 master 分支（现在无冲突）
           git fetch origin
           git checkout master || git checkout -b master
+          echo "Switched to master branch"
 
-          # 移除所有 tracked 文件（保留 .git）
+          # 清理 master 根目录（移除旧文件，保留 .git）
           git rm -rf . --ignore-unmatch || true
-
-          # 移除 untracked 文件/目录（排除 .git）
           git clean -fdx -e .git || true
+          echo "Cleaned master directory"
 
-          # 复制 dist 内容到根目录
-          if [ -d "dist" ]; then
-            cp -r dist/* . || true
-            echo "Copied dist contents"
+          # 从临时目录复制 dist 内容到 master 根目录
+          if [ -d "/tmp/dist" ] && [ "$(ls -A /tmp/dist)" ]; then
+            cp -r /tmp/dist/* . || true
+            echo "Copied dist contents to master"
           else
-            echo "dist directory not found - skipping copy"
-            exit 1  # 失败如果无 dist
+            echo "No dist contents to copy - failing"
+            exit 1
           fi
 
           # 添加所有文件
           git add .
 
-          # 仅在有变化时 commit
+          # 仅在有变化时 commit/push
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
             git commit -m "chore: update dist from gh-pages build [skip ci]"
             git push origin master
+            echo "Pushed changes to master"
           fi
+
+          # 清理临时目录
+          rm -rf /tmp/dist
