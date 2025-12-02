@@ -2,7 +2,7 @@ name: Build and Deploy Dist to Master
 
 on:
   push:
-    branches: [ gh-pages ]  # 仅 gh-pages push 触发，避免干扰
+    branches: [ gh-pages ]
 
 jobs:
   build:
@@ -11,20 +11,24 @@ jobs:
       - name: Checkout gh-pages branch
         uses: actions/checkout@v4
         with:
-          ref: gh-pages  # 检出开发分支（源代码）
-          token: ${{ secrets.GITHUB_TOKEN }}  # 授予 push 权限到 master
+          ref: gh-pages
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'  # 调整为你的 Node 版本
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci  # 需要 package-lock.json 已提交到 gh-pages
+        run: npm ci
 
       - name: Run build
-        run: npm run build  # 生成 dist/（仅构建产物）
+        run: npm run build
+
+      - name: Debug build output (optional, remove after testing)
+        run: |
+          ls -la dist/ || echo "dist not found or empty"
 
       - name: Deploy dist to master branch
         run: |
@@ -36,17 +40,25 @@ jobs:
           git fetch origin
           git checkout master || git checkout -b master
 
-          # 清理 master 根目录所有文件（保留 .git 隐含文件如 README.md 如果需要；否则全清）
-          git rm -rf . --ignore-unmatch || true  # 忽略未跟踪文件错误
-          rm -rf * .[^.]*  # 移除所有可见/隐藏文件（安全清理）
+          # 移除所有 tracked 文件（保留 .git）
+          git rm -rf . --ignore-unmatch || true
 
-          # 复制 dist 内容到 master 根目录（覆盖/新建）
-          cp -r dist/* . || true  # 忽略空 dist 错误
+          # 移除 untracked 文件/目录（排除 .git）
+          git clean -fdx -e .git || true
 
-          # 添加所有文件到 staging
+          # 复制 dist 内容到根目录
+          if [ -d "dist" ]; then
+            cp -r dist/* . || true
+            echo "Copied dist contents"
+          else
+            echo "dist directory not found - skipping copy"
+            exit 1  # 失败如果无 dist
+          fi
+
+          # 添加所有文件
           git add .
 
-          # 仅在有变化时 commit（避免空 commit）
+          # 仅在有变化时 commit
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
