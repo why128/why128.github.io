@@ -27,3 +27,4 @@ build/
 # OS 生成的文件
 .DS_Store
 Thumbs.db
+package-lock.json
