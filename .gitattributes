@@ -1,0 +1,9 @@
+*.js linguist-language=svelte
+*.ts linguist-language=svelte
+*.css linguist-language=svelte
+*.html linguist-language=svelte
+*.json linguist-language=svelte
+*.yml linguist-language=svelte
+*.md linguist-language=svelte
+*.py linguist-language=svelte
+*.sh linguist-language=svelte
