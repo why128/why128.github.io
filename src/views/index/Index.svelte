@@ -1,34 +1,45 @@
 <script lang="ts">
     import Header from "@/views/header/Index.svelte";
     import Footer from "@/views/footer/Index.svelte";
-    import { onMount } from "svelte";
+    import supabase from "$lib/supabase";
+
     // TS 接口：文章类型
     interface Post {
         title: string;
         date: string;
         excerpt: string;
+        content: string;
         link: string; // 文章链接
         readTime?: number; // 可选：阅读时间
     }
+    // 查询示例
+    let posts: Post[] = [];
+    (async () => {
+        const { data, error } = await supabase
+            .from("githubio_list")
+            .order("id", { ascending: false })
+            .range(0, 9) // offset + limit 自动计算
+            .select("*"); // 自动发起请求
+        console.log(data);
+        if (error) {
+            console.error("查询失败 (Error)", error);
 
-    // 示例数据（后期从 posts/*.md 加载）
-    let posts: Post[] = [
-        {
-            title: "示例文章 1：Svelte 入门",
-            date: "2025-12-02",
-            excerpt: "Svelte 的响应式组件如何简化博客开发...",
-            link: "/post/1",
-            readTime: 5,
-        },
-        {
-            title: "示例文章 2：TypeScript 在前端",
-            date: "2025-11-28",
-            excerpt: "探索 TS 类型安全的优势...",
-            link: "/post/2",
-            readTime: 8,
-        },
-        // 添加更多...
-    ];
+            // 关键：检查 status 字段
+            if (error.status === 401) {
+                console.warn(
+                    "错误类型: 401 Unauthorized - 认证失败，请检查 FRONTEND_TOKEN 或 DUMMY_KEY",
+                );
+            } else if (error.status === 404) {
+                console.warn(
+                    `错误类型: 404 Not Found - 表 githubio_list 可能不存在`,
+                );
+            } else {
+                console.warn(`错误类型: 其他错误 Status ${error.status}`);
+            }
+            return null;
+        }
+        posts = data;
+    })();
 
     // 分页示例（当前页、总页）
     let currentPage = 1;

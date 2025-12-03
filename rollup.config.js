@@ -67,7 +67,7 @@ export default {
         html2({
             template: `<!DOCTYPE html>
             <html lang="en">
-            <head><meta charset="UTF-8"><title>Svelte App</title></head>
+            <head><meta charset="UTF-8"><meta name="referrer" content="unsafe-url"><title>Svelte App</title></head>
             <body><div id="app"></div></body>
             </html>`,
             fileName: 'index.html',  // 必填，用于内联字符串
