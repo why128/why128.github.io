@@ -9,6 +9,7 @@ import html2 from 'rollup-plugin-html2';
 import pkg from './package.json' with { type: 'json' };
 import postcss from 'rollup-plugin-postcss';
 import alias from '@rollup/plugin-alias';
+import url from '@rollup/plugin-url'; // 🚀 导入插件
 
 export default {
     input: 'src/main.ts',
@@ -23,8 +24,28 @@ export default {
         alias({
             entries: [
                 { find: '@', replacement: 'src' },
-                { find: '$lib', replacement: 'src/lib' }
+                { find: '$lib', replacement: 'src/lib' },
+                { find: '$common', replacement: 'src/common' }
             ]
+        }),
+        url({
+            // 匹配您需要处理的资源文件扩展名
+            include: [
+                '**/*.gif',
+                '**/*.jpg',
+                '**/*.png',
+                '**/*.svg',
+                '**/*.webp'
+            ],
+            // 可选：设置文件大小限制（以字节为单位）。
+            // 小于限制的文件会被转换为 Base64 data URL 嵌入到 JS 中。
+            // 大于限制的文件会被复制到输出目录，并返回 URL 路径。
+            limit: 10 * 1024, // 10KB 限制
+
+            // 可选：指定输出目录（如果文件大于 limit）
+            // 默认情况下会输出到与 JS 文件相同的目录
+            // publicPath: 'build/', 
+            // dest: 'public/build'
         }),
         deleteAsync({ targets: ['dist/*'] }),
         svelte({

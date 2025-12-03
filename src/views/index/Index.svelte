@@ -5,7 +5,7 @@
     import { onMount } from "svelte";
     import { link } from "svelte-spa-router";
     import { formatTime } from "$lib/util";
-
+    import Diago from "@/component/diago.svelte";
     // TS 接口：文章类型
     interface Post {
         id: number;
@@ -16,6 +16,8 @@
         link: string; // 文章链接
         readTime?: number; // 可选：阅读时间
     }
+    // 显示是否加载中
+    let loading = false;
     // 查询示例
     let posts: Post[] = [];
     // 分页示例（当前页、总页）
@@ -23,6 +25,7 @@
     let size = 2;
     let totalPages = 1;
     async function getData(page: number, size: number) {
+        loading = true;
         const { data, error } = await supabase
             .from("githubio_list")
             .order("id", { ascending: false })
@@ -55,6 +58,7 @@
             link: v.link,
             readTime: v.readTime,
         }));
+        loading = false;
     }
 
     (async () => {
@@ -81,6 +85,7 @@
     });
 </script>
 
+<Diago diago={loading} />
 <Header />
 <main class="main">
     <div class="container">
@@ -94,8 +99,7 @@
                     </h2>
                     <div class="post-meta">
                         <span class="date">{post.date}</span>
-                        <span class="read-time">· {post.readTime} 分钟阅读</span
-                        >
+                        <span class="read-time">· {post.readTime} 次阅读</span>
                     </div>
                     <p class="post-excerpt">{post.excerpt}</p>
                     <a
@@ -108,7 +112,7 @@
         </div>
 
         <!-- 分页 -->
-        {#if totalPages > 0}
+        {#if totalPages > 1}
             <nav class="pagination">
                 <ul>
                     {#if currentPage > 1}

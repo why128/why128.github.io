@@ -57,7 +57,7 @@ class SupabaseWorkerClient {
 
         /**
          * 发送 Fetch 请求，并统一处理响应结果和错误。
-         * 结果格式为 { data, error, count }
+         * 增强了对空响应体的处理。
          */
         const fetchRequest = async (method: string, prefer?: string): Promise<{ data: any | null, error: { message: string, status: number } | null, count?: number | null }> => {
             const url = buildUrl();
@@ -90,11 +90,23 @@ class SupabaseWorkerClient {
                     return { data: null, error: { message: `[${res.status} ${res.statusText}] ${message}`, status: res.status } };
                 }
 
+                // 检查 204 No Content 状态
                 if (res.status === 204) {
                     return { data: [], error: null, count: null };
                 }
 
-                const data = await res.json();
+                // 核心修正：先获取响应体文本，避免在空体上调用 res.json()
+                const responseText = await res.text();
+
+                if (responseText.length === 0) {
+                    // 如果状态码 OK (如 200, 201) 但响应体为空，返回空数组
+                    return { data: [], error: null, count: null };
+                }
+
+                // 只有在响应体有内容时才尝试解析 JSON
+                const data = JSON.parse(responseText);
+                // 核心修正结束
+
                 const count = prefer?.includes('count=exact')
                     ? parseInt(res.headers.get('content-range')?.split('/')[1] || '0')
                     : null;
@@ -102,41 +114,30 @@ class SupabaseWorkerClient {
                 return { data, error: null, count };
 
             } catch (e: any) {
+                // 捕获所有客户端错误，包括 JSON 解析错误
                 return { data: null, error: { message: `Client Error: Failed to process response. ${e.message || e}`, status: res.status } };
             }
         };
 
         // 链式调用对象
         const chain: any = {
-            // =========================================================================
-            // CRUD - READ (查询)
-            // =========================================================================
-
-            /**
-             * 优化后：select() 现在只设置要选择的列，并返回 chain 对象，不执行请求。
-             * @param columns 要选择的列，默认为 '*'。
-             */
+            // ... (select, get 方法保持不变) ...
             select(columns: string = '*') {
                 query.selectCols = columns;
-                return this; // 返回 chain 对象，允许后续调用 eq/order/limit 等
+                return this;
             },
 
-            /**
-             * 新增：get() 作为 SELECT 链的终端执行方法。
-             * @param options 可选地包含 { count: 'exact' } 以获取总行数。
-             */
             get({ count = null }: { count?: 'exact' | null } = {}) {
                 let prefer = '';
                 if (count === 'exact') {
-                    // PostgREST 的计数 Prefer 头
                     prefer = 'count=exact';
                 }
-                return fetchRequest('GET', prefer); // 执行 GET 请求并返回 Promise
+                return fetchRequest('GET', prefer);
             },
 
             // =========================================================================
             // CRUD - MUTATIONS (增、改、删)
-            // ... (insert, update, delete 保持不变，它们仍然是终端方法) ...
+            // =========================================================================
 
             insert(data: any, { returning = 'representation' }: { returning?: 'minimal' | 'representation' } = {}) {
                 query.body = Array.isArray(data) ? data : [data];
@@ -144,9 +145,13 @@ class SupabaseWorkerClient {
                 return fetchRequest('POST', prefer);
             },
 
+            /**
+             * 更新数据 (UPDATE)。🚀 修正：恢复为标准的 PATCH 请求。
+             */
             update(data: any, { returning = 'representation' }: { returning?: 'minimal' | 'representation' } = {}) {
                 query.body = data;
                 const prefer = `return=${returning}`;
+                // 🚀 恢复使用 PATCH
                 return fetchRequest('PATCH', prefer);
             },
 
@@ -155,26 +160,10 @@ class SupabaseWorkerClient {
                 return fetchRequest('DELETE', prefer);
             },
 
-            // =========================================================================
-            // QUERY MODIFIERS & FILTERS (查询构造器和过滤器)
-            // ... (这些方法保持不变，它们都返回 this (chain 对象) ) ...
-
-            order(column: string, { ascending = true } = {}) {
-                query.orders.push({ column, ascending });
-                return this;
-            },
-
-            limit(count: number) {
-                query.limit = count;
-                return this;
-            },
-
-            range(from: number, to: number) {
-                query.offset = from;
-                query.limit = to - from + 1;
-                return this;
-            },
-
+            // ... (QUERY MODIFIERS & FILTERS 保持不变) ...
+            order(column: string, { ascending = true } = {}) { query.orders.push({ column, ascending }); return this; },
+            limit(count: number) { query.limit = count; return this; },
+            range(from: number, to: number) { query.offset = from; query.limit = to - from + 1; return this; },
             eq(column: string, value: any) { query.filters.push({ column, value, operator: 'eq' }); return this; },
             neq(column: string, value: any) { query.filters.push({ column, value, operator: 'neq' }); return this; },
             gt(column: string, value: any) { query.filters.push({ column, value, operator: 'gt' }); return this; },
@@ -183,9 +172,7 @@ class SupabaseWorkerClient {
             lte(column: string, value: any) { query.filters.push({ column, value, operator: 'lte' }); return this; },
             like(column: string, pattern: string) { query.filters.push({ column, value: pattern, operator: 'like' }); return this; },
             ilike(column: string, pattern: string) { query.filters.push({ column, value: pattern, operator: 'ilike' }); return this; },
-
             in(column: string, values: any[]) { query.filters.push({ column, value: values, operator: 'in' }); return this; },
-
             match(obj: Record<string, any>) {
                 Object.entries(obj).forEach(([col, val]) => query.filters.push({ column: col, value: val, operator: 'eq' }));
                 return this;
@@ -196,7 +183,7 @@ class SupabaseWorkerClient {
     }
 }
 
-// 使用示例
+// 导出实例
 const supabase = new SupabaseWorkerClient(WORKER_URL, FRONTEND_TOKEN);
 
 export default supabase;
