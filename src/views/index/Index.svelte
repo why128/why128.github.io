@@ -2,9 +2,13 @@
     import Header from "@/views/header/Index.svelte";
     import Footer from "@/views/footer/Index.svelte";
     import supabase from "$lib/supabase";
+    import { onMount } from "svelte";
+    import { link } from "svelte-spa-router";
+    import { formatTime } from "$lib/util";
 
     // TS 接口：文章类型
     interface Post {
+        id: number;
         title: string;
         date: string;
         excerpt: string;
@@ -14,13 +18,17 @@
     }
     // 查询示例
     let posts: Post[] = [];
-    (async () => {
+    // 分页示例（当前页、总页）
+    let currentPage = 1;
+    let size = 2;
+    let totalPages = 1;
+    async function getData(page: number, size: number) {
         const { data, error } = await supabase
             .from("githubio_list")
             .order("id", { ascending: false })
-            .range(0, 9) // offset + limit 自动计算
-            .select("*"); // 自动发起请求
-        console.log(data);
+            .range((page - 1) * size, page * size - 1) // offset + limit 自动计算
+            .select("id,title,date,excerpt,content,link,readTime")
+            .get(); // 自动发起请求
         if (error) {
             console.error("查询失败 (Error)", error);
 
@@ -38,18 +46,39 @@
             }
             return null;
         }
-        posts = data;
-    })();
+        posts = data.map((v: Post) => ({
+            id: v.id,
+            title: v.title,
+            date: formatTime(v.date),
+            excerpt: v.excerpt,
+            content: v.content,
+            link: v.link,
+            readTime: v.readTime,
+        }));
+    }
 
-    // 分页示例（当前页、总页）
-    let currentPage = 1;
-    let totalPages = 5;
+    (async () => {
+        const { data: totalData, error: totalError } = await supabase
+            .from("githubio_list")
+            .select("id")
+            .get({ count: "exact" });
+        if (totalError) {
+            console.error("查询失败 (Error)", totalError);
+            return null;
+        }
+        totalPages = Math.ceil(totalData.length / size);
+    })();
 
     // 简单分页函数（占位）
     function goToPage(page: number) {
         currentPage = page;
         // 加载新 posts...
+        getData(currentPage, size);
     }
+
+    onMount(() => {
+        getData(currentPage, size);
+    });
 </script>
 
 <Header />
@@ -59,7 +88,9 @@
             {#each posts as post}
                 <article class="post-item">
                     <h2 class="post-title">
-                        <a href={post.link}>{post.title}</a>
+                        <a href={`${post.link}/${post.id}`} use:link
+                            >{post.title}</a
+                        >
                     </h2>
                     <div class="post-meta">
                         <span class="date">{post.date}</span>
@@ -67,13 +98,17 @@
                         >
                     </div>
                     <p class="post-excerpt">{post.excerpt}</p>
-                    <a href={post.link} class="read-more">阅读全文 →</a>
+                    <a
+                        href={`${post.link}/${post.id}`}
+                        use:link
+                        class="read-more">阅读全文 →</a
+                    >
                 </article>
             {/each}
         </div>
 
         <!-- 分页 -->
-        {#if totalPages > 1}
+        {#if totalPages > 0}
             <nav class="pagination">
                 <ul>
                     {#if currentPage > 1}
@@ -111,18 +146,13 @@
 <Footer />
 
 <style>
-    /* 主体：文章列表 */
-    .main {
-        min-height: calc(100vh - 200px); /* 占满剩余高度 */
-        padding: 40px 0;
-    }
     .posts {
         display: flex;
         flex-direction: column;
         gap: 30px;
     }
     .post-item {
-        background: #fff;
+        background: rgba(255, 255, 255, 0.6);
         border: 1px solid #eee;
         border-radius: 8px;
         padding: 25px;

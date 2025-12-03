@@ -9,8 +9,6 @@
         <nav class="nav">
             <ul>
                 <li><a href="/">首页</a></li>
-                <li><a href="/archives">归档</a></li>
-                <li><a href="/categories">分类</a></li>
                 <li><a href="/about" use:link>关于</a></li>
                 <li><a href="/subscribe">订阅</a></li>
             </ul>
@@ -21,7 +19,7 @@
 <style>
     /* 头部：固定导航 */
     .header {
-        background: #fff;
+        background: rgba(255, 255, 255, 0.3);
         border-bottom: 1px solid #eee;
         position: sticky;
         top: 0;

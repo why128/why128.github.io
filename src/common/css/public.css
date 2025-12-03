@@ -1,6 +1,71 @@
 /* src/common/css/public.css */
 body {
     font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* animation: bgChange 30s infinite; */
+    background: url('https://image.wattley.top/file/AgACAgUAAyEGAATPGd8VAAO9aS0IQabDi4xnNumPfZ_6WekeLmYAAjoLaxtiyGlVHhY-IWu4taoBAAMCAAN5AAM2BA.jpeg');
+    background-size: cover;
+    background-position: center 40%;
+    background-repeat: no-repeat;
+    opacity: 0.4;
+    z-index: -1;
+}
+
+@keyframes bgChange {
+    0% {
+        background-image: url('https://image.wattley.top/file/AgACAgUAAyEGAATPGd8VAAO9aS0IQabDi4xnNumPfZ_6WekeLmYAAjoLaxtiyGlVHhY-IWu4taoBAAMCAAN5AAM2BA.jpeg');
+    }
+
+    10% {
+        background-image: url('https://image.wattley.top/file/AgACAgUAAyEGAATPGd8VAAO5aS0IGLFkvkwshbnYM0X2nnrn7ZQAAjgLaxtiyGlVlPdy_5yBohgBAAMCAAN5AAM2BA.jpeg');
+    }
+
+    20% {
+        background-image: url('https://image.wattley.top/file/AgACAgUAAyEGAATPGd8VAAO3aS0IGCVJeVDGen1Z7Ftti7wWSosAAjYLaxtiyGlVvQ1E6FXem-8BAAMCAAN5AAM2BA.jpeg');
+    }
+
+    30% {
+        background-image: url('https://image.wattley.top/file/AgACAgUAAyEGAATPGd8VAAO1aS0H-g1fJawP4hBJkmJZN6hWF8MAAjQLaxtiyGlVRqB57zAIcnMBAAMCAAN5AAM2BA.jpeg');
+    }
+
+    40% {
+        background-image: url('https://image.wattley.top/file/AgACAgUAAyEGAATPGd8VAANFaSwz5_X3iZTbFSZ7wMsahm8HH_4AAvULaxtiyGFVCVMm85gh4R0BAAMCAAN5AAM2BA.jpeg');
+    }
+
+    50% {
+        background-image: url('https://image.wattley.top/file/AgACAgUAAyEGAATPGd8VAAM6aSwz2XQitn2eqzURNAHfyIXeS0oAAuoLaxtiyGFVCcWTOHShpQABAQADAgADeQADNgQ.jpeg');
+    }
+
+    60% {
+        background-image: url('https://image.wattley.top/file/AgACAgUAAyEGAATPGd8VAAOWaSw4UZC5x-LOedeUG0Tz244p6MYAAj0MaxtiyGFVnBi1mFI0ou0BAAMCAAN4AAM2BA.jpeg');
+    }
+
+    70% {
+        background-image: url('https://image.wattley.top/file/AgACAgUAAyEGAATPGd8VAAOUaSw4LgABK85InyZf-JEHhokbTUBFAAI7DGsbYshhVfzRPLzMay8zAQADAgADeQADNgQ.jpeg');
+    }
+
+    80% {
+        background-image: url('https://image.wattley.top/file/AgACAgUAAyEGAATPGd8VAAOGaSw37AWRJq5jVrnxlr9R0utocSsAAjEMaxtiyGFVF7nX2YkjwQQBAAMCAAN5AAM2BA.jpeg');
+    }
+
+    90% {
+        background-image: url('https://image.wattley.top/file/AgACAgUAAyEGAATPGd8VAAN8aSw3rcZqJX2NjeqqEAx4U59rg6kAAiwMaxtiyGFVxo5T2KKACRsBAAMCAAN5AAM2BA.jpeg');
+    }
+
+    100% {
+        background-image: url('https://image.wattley.top/file/AgACAgUAAyEGAATPGd8VAAO9aS0IQabDi4xnNumPfZ_6WekeLmYAAjoLaxtiyGlVHhY-IWu4taoBAAMCAAN5AAM2BA.jpeg');
+    }
 }
 
 /* 全局重置与基础 */
@@ -29,4 +94,11 @@ body {
     .container {
         padding: 0 15px;
     }
+}
+
+/* 主体：文章列表 */
+.main {
+    min-height: calc(100vh - 231px);
+    /* 占满剩余高度 */
+    padding: 40px 0;
 }

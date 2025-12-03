@@ -2,7 +2,7 @@
     <div class="container">
         <p>
             &copy; 2025 MintYouth. Powered by Typecho. <a href="/rss">RSS</a> |
-            <a href="https://github.com/snwl0311">GitHub</a>
+            <a href="https://github.com/why128">GitHub</a>
         </p>
     </div>
 </footer>
@@ -10,7 +10,7 @@
 <style>
     /* 脚注：简单居中 */
     .footer {
-        background: #f8f9fa;
+        background: rgba(248, 249, 250, 0.3);
         border-top: 1px solid #eee;
         padding: 20px 0;
         text-align: center;
