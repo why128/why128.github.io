@@ -1,8 +1,16 @@
+<script lang="ts">
+    import { link } from "svelte-spa-router";
+</script>
+
 <footer class="footer">
     <div class="container">
         <p>
-            &copy; 2025 MintYouth. Powered by Typecho. <a href="/rss">RSS</a> |
-            <a href="https://github.com/why128">GitHub</a>
+            &copy; 2025 MintYouth. Powered by Typecho. <a
+                href="/subscribe"
+                use:link>RSS</a
+            >
+            |
+            <a target="_blank" href="https://github.com/why128">GitHub</a>
         </p>
     </div>
 </footer>

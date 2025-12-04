@@ -82,7 +82,7 @@ export default {
             <meta charset="UTF-8">
             <meta name="referrer" content="unsafe-url">
             <meta name="viewport" content="initial-scale=1,minimum-scale=1,width=device-width,interactive-widget=resizes-content">
-            <title>Svelte App</title>
+            <title>博客空间why128</title>
             </head>
             <body><div id="app"></div></body>
             </html>`,

@@ -10,7 +10,7 @@
             <ul>
                 <li><a href="/">首页</a></li>
                 <li><a href="/about" use:link>关于</a></li>
-                <li><a href="/subscribe">订阅</a></li>
+                <li><a href="/subscribe" use:link>订阅</a></li>
             </ul>
         </nav>
     </div>

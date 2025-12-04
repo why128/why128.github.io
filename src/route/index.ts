@@ -2,12 +2,13 @@ import Index from "@/views/index/Index.svelte";
 import About from "@/views/about/Index.svelte";
 import Error404 from "@/views/error404/Index.svelte";
 import Detail from "@/views/detail/Index.svelte";
-
+import Subscribe from "@/views/subscribe/Index.svelte";
 
 const routes: object = {
     "/": Index,
     "/about": About,
     "/detail/:id": Detail,
+    "/subscribe": Subscribe,
     // 支持动态路由：'/user/:id': User
     "*": Error404, // 默认路由（404 回首页）
 };
