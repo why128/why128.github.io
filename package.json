@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.86.0",
+    "lunisolar": "^2.6.0",
     "svelte-spa-router": "^4.0.1",
     "tslib": "^2.8.1"
   }
