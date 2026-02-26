@@ -4,10 +4,11 @@ import Error404 from "@/views/error404/Index.svelte";
 import Detail from "@/views/detail/Index.svelte";
 import Subscribe from "@/views/subscribe/Index.svelte";
 import EightCharacters from "@/views/eightcharacters/Index.svelte";
-
+import Gossip from "@/views/gossip/Index.svelte";
 const routes: object = {
     "/": Index,
     "/about": About,
+    "/gossip": Gossip,
     "/detail/:id": Detail,
     "/subscribe": Subscribe,
     "/eightcharacters": EightCharacters,

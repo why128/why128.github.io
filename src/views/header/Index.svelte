@@ -11,6 +11,7 @@
                 <li><a href="/">首页</a></li>
                 <li><a href="/about" use:link>关于</a></li>
                 <li><a href="/eightcharacters" use:link>八字</a></li>
+                <li><a href="/gossip" use:link>八卦</a></li>
                 <li><a href="/subscribe" use:link>订阅</a></li>
             </ul>
         </nav>
