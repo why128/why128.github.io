@@ -102,7 +102,7 @@
         gameState = game.getState();
         currentLevel = game.getCurrentLevel();
         moves = game.getMoves();
-
+        canUndo = game.canUndo();
         console.log("Game state updated:", {
             state: gameState,
             level: currentLevel,
