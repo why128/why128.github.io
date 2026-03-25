@@ -1,5 +1,6 @@
 <script lang="ts">
     import { link } from "svelte-spa-router"; // 修复：导入 action（非组件）
+    import AliyunAd from "@/component/AliyunAd.svelte";
 </script>
 
 <!-- HTML 结构：头部 + 主体 + 脚注 -->
@@ -17,6 +18,7 @@
         </nav>
     </div>
 </header>
+<AliyunAd></AliyunAd>
 
 <style>
     /* 头部：固定导航 */

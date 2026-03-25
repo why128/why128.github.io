@@ -18,4 +18,6 @@
 
 ---
 * 🐱‍🚀项目采用 Svelte + rollup技术，自行搭建的脚手架，利用fetch请求数据
+* 🐱‍🚀node version v24.11.0
+* 🐱‍🚀npm version 11.6.1
 + 
