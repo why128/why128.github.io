@@ -6,22 +6,38 @@
 
     const adLink = "https://www.aliyun.com/minisite/goods?userCode=hb1owdvu";
 
-    // 初始化：从 localStorage 读取状态
+    // 初始化逻辑
     if (typeof window !== "undefined") {
-        const closed = localStorage.getItem(STORAGE_KEY);
-        if (closed === "true") {
-            visible = false;
-        } else {
-            // 延迟触发动画
-            setTimeout(() => {
-                mounted = true;
-            }, 100);
+        // 获取存储的关闭日期
+        const closedDateStr = localStorage.getItem(STORAGE_KEY);
+
+        if (closedDateStr) {
+            const closedDate = new Date(closedDateStr);
+            const today = new Date();
+
+            // 如果关闭日期是今天，则不显示广告
+            if (
+                closedDate.getDate() === today.getDate() &&
+                closedDate.getMonth() === today.getMonth() &&
+                closedDate.getFullYear() === today.getFullYear()
+            ) {
+                visible = false; // 今天已关闭，不显示
+            }
+            // 否则（没存过或不是今天），继续显示
         }
+
+        // 延迟显示动画（可选）
+        setTimeout(() => {
+            mounted = true;
+        }, 100);
     }
 
+    // 关闭广告的函数
     function closeAd() {
+        const today = new Date();
+        // 只存储今天的日期，格式为 ISO 字符串（也可以只存 YYYY-MM-DD）
+        localStorage.setItem(STORAGE_KEY, today.toISOString());
         visible = false;
-        localStorage.setItem(STORAGE_KEY, "true");
     }
 </script>
 
