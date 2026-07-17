@@ -29,15 +29,32 @@
         d = lunisolar(formatDateTime(datetime));
     }
 
+    // 校验函数：确保日期是完整的 YYYY-MM-DD 格式且年份以 1 或 2 开头
+    function isValidDate(dateStr: string): boolean {
+        if (!dateStr) return false;
+        
+        // 年份首位必须是 1 或 2（对应1000年~2999年）
+        if (dateStr[0] !== '1' && dateStr[0] !== '2') return false; 
+        
+        // 使用正则匹配 4位年-2位月-2位日
+        const regex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!regex.test(dateStr)) return false;
+        
+        // 确保能被 JS Date 正确解析
+        const parsedDate = new Date(dateStr);
+        return !isNaN(parsedDate.getTime());
+    }
+
     function reinit() {
-        if (date && time && isValidDate()) {
+        // 1. 传入 date 变量进行校验
+        if (date && time && isValidDate(date)) {
             datetime = `${date}T${time}`;
             try {
                 initLunisolar();
             } catch (e) {
-                alert("请输入正确的日期和时间！");
+                alert("解析八字失败，请输入正确的日期！");
             }
-        }else {
+        } else {
             alert("请输入正确的日期和时间！");
         }
     }
@@ -45,29 +62,6 @@
     onMount(() => {
         initLunisolar();
     });
-    // 增加一个校验函数，确保日期是完整的 YYYY-MM-DD 格式
-    function isValidDate(dateStr: string): boolean {
-        if (!dateStr) return false;
-        if (dateStr[0] !== '1' || dateStr[0] !== '2') return false;
-        // 使用正则匹配 4位年-2位月-2位日
-        const regex = /^\d{4}-\d{2}-\d{2}$/;
-        if (!regex.test(dateStr)) return false;
-        // 确保能被 JS Date 正确解析
-        const d = new Date(dateStr);
-        return !isNaN(d.getTime());
-    }
-
-    /*$: {
-        if (date && time && isValidDate(date)) {
-            datetime = `${date}T${time}`;
-            // 增加 try-catch 保护，防止第三方库因为非常规日期报错挂起页面
-            try {
-                initLunisolar();
-            } catch (e) {
-                console.error("Lunisolar 解析失败:", e);
-            }
-        }
-    }*/
 </script>
 
 <Header />
@@ -90,61 +84,69 @@
             <button on:click={reinit} class="query-btn">查询八字</button>
         </div>
 
-        <div class="result-card">
-            <table class="table-c">
-                <thead>
-                    <tr>
-                        <th>八字</th>
-                        <th>年柱</th>
-                        <th>月柱</th>
-                        <th class="self">日柱</th>
-                        <th>时柱</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="tian-tr">
-                        <td>天干</td>
-                        <td style="color:{color_t_arr[d.char8.year.stem.toString()]}">
-                            <i>{gxarr[d.char8.year.stem.toString()]?.[d.char8.year.stem.toString()] || ''}</i>{d.char8.year.stem.toString()}
-                        </td>
-                        <td style="color:{color_t_arr[d.char8.month.stem.toString()]}">
-                            <i>{gxarr[d.char8.month.stem.toString()]?.[d.char8.month.stem.toString()] || ''}</i>{d.char8.month.stem.toString()}
-                        </td>
-                        <td class="self-td" style="color:{color_t_arr[d.char8.day.stem.toString()]}">
-                            {d.char8.day.stem.toString()}
-                        </td>
-                        <td style="color:{color_t_arr[d.char8.hour.stem.toString()]}">
-                            <i>{gxarr[d.char8.hour.stem.toString()]?.[d.char8.hour.stem.toString()] || ''}</i>{d.char8.hour.stem.toString()}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>地支</td>
-                        <td style="color:{color_d_arr[d.char8.year.branch.toString()]}">{d.char8.year.branch.toString()}</td>
-                        <td style="color:{color_d_arr[d.char8.month.branch.toString()]}">{d.char8.month.branch.toString()}</td>
-                        <td style="color:{color_d_arr[d.char8.day.branch.toString()]}">{d.char8.day.branch.toString()}</td>
-                        <td style="color:{color_d_arr[d.char8.hour.branch.toString()]}">{d.char8.hour.branch.toString()}</td>
-                    </tr>
-                    <tr class="cang">
-                        <td>藏干</td>
-                        {#each [d.char8.year.branch, d.char8.month.branch, d.char8.day.branch, d.char8.hour.branch] as branch}
-                            <td class="cang-item">
-                                {#each branch.hiddenStems as stem}
-                                    {@const stemStr = stem.toString()}
-                                    <span style="color:{color_t_arr[stemStr]}">
-                                        {stemStr} <i>{gxarr[d.char8.day.stem.toString()]?.[stemStr] || ''}</i>
-                                    </span>
-                                {/each}
+        <!-- 关键修改：只有当 d 存在时，才渲染结果卡片，防止初始化时因 undefined 报错 -->
+        {#if d}
+            <div class="result-card">
+                <table class="table-c">
+                    <thead>
+                        <tr>
+                            <th>八字</th>
+                            <th>年柱</th>
+                            <th>月柱</th>
+                            <th class="self">日柱</th>
+                            <th>时柱</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="tian-tr">
+                            <td>天干</td>
+                            <td style="color:{color_t_arr[d.char8.year.stem.toString()]}">
+                                <i>{gxarr[d.char8.year.stem.toString()]?.[d.char8.year.stem.toString()] || ''}</i>{d.char8.year.stem.toString()}
                             </td>
-                        {/each}
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                            <td style="color:{color_t_arr[d.char8.month.stem.toString()]}">
+                                <i>{gxarr[d.char8.month.stem.toString()]?.[d.char8.month.stem.toString()] || ''}</i>{d.char8.month.stem.toString()}
+                            </td>
+                            <td class="self-td" style="color:{color_t_arr[d.char8.day.stem.toString()]}">
+                                {d.char8.day.stem.toString()}
+                            </td>
+                            <td style="color:{color_t_arr[d.char8.hour.stem.toString()]}">
+                                <i>{gxarr[d.char8.hour.stem.toString()]?.[d.char8.hour.stem.toString()] || ''}</i>{d.char8.hour.stem.toString()}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>地支</td>
+                            <td style="color:{color_d_arr[d.char8.year.branch.toString()]}">{d.char8.year.branch.toString()}</td>
+                            <td style="color:{color_d_arr[d.char8.month.branch.toString()]}">{d.char8.month.branch.toString()}</td>
+                            <td style="color:{color_d_arr[d.char8.day.branch.toString()]}">{d.char8.day.branch.toString()}</td>
+                            <td style="color:{color_d_arr[d.char8.hour.branch.toString()]}">{d.char8.hour.branch.toString()}</td>
+                        </tr>
+                        <tr class="cang">
+                            <td>藏干</td>
+                            {#each [d.char8.year.branch, d.char8.month.branch, d.char8.day.branch, d.char8.hour.branch] as branch}
+                                <td class="cang-item">
+                                    {#each branch.hiddenStems as stem}
+                                        {@const stemStr = stem.toString()}
+                                        <span style="color:{color_t_arr[stemStr]}">
+                                            {stemStr} <i>{gxarr[d.char8.day.stem.toString()]?.[stemStr] || ''}</i>
+                                        </span>
+                                    {/each}
+                                </td>
+                            {/each}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        {:else}
+            <div class="result-card" style="text-align: center; color: #888;">
+                正在加载排盘数据...
+            </div>
+        {/if}
     </div>
 </div>
 <Footer />
 
 <style>
+    /* 保持原样式不变 */
     .container {
         max-width: 1000px;
         margin: 0 auto;
