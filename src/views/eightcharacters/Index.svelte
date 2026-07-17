@@ -246,21 +246,21 @@
             <div class="input-group">
                 <div class="input-field">
                     <label for="start">出生日期</label>
-                    <input type="date" id="start" bind:value={date} on:change={reinit} min="1900-01-01" max="2100-12-31" />
+                    <input type="date" id="start" bind:value={date} min="1900-01-01" max="2100-12-31" />
                 </div>
                 <div class="input-field">
                     <label for="appt">出生时间</label>
-                    <input type="time" id="appt" bind:value={time} on:change={reinit} min="00:00" max="23:59" step="600" />
+                    <input type="time" id="appt" bind:value={time} min="00:00" max="23:59" step="600" />
                 </div>
                 <div class="input-field">
                     <label>性别</label>
                     <div class="gender-radio-group">
                         <label class="radio-label">
-                            <input type="radio" name="gender" value="1" bind:group={gender} on:change={reinit} />
+                            <input type="radio" name="gender" value="1" bind:group={gender} />
                             <span>男 (乾造)</span>
                         </label>
                         <label class="radio-label">
-                            <input type="radio" name="gender" value="0" bind:group={gender} on:change={reinit} />
+                            <input type="radio" name="gender" value="0" bind:group={gender} />
                             <span>女 (坤造)</span>
                         </label>
                     </div>
