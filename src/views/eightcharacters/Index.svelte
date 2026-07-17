@@ -4,39 +4,32 @@
     import lunisolar from "lunisolar";
     import { onMount } from "svelte";
 
-    // 引入 theGods 插件用于辅助神煞和八字计算
     import theGods from "lunisolar/plugins/theGods";
     lunisolar.extend(theGods);
 
     let date = new Date().toISOString().substring(0, 10);
     let time = new Date().toTimeString().substring(0, 5);
     let datetime = `${date}T${time}`;
-    
-    // 性别变量，"1" 代表男(乾造)，"0" 代表女(坤造)
-    let gender = "1"; 
+    let gender = "1";
 
-    let d: lunisolar.Lunisolar;
-    d = lunisolar(formatDateTime(datetime));
-    // --- 内置常用易学常量（防止 ./emun 引入报错） ---
-    // 天干五行颜色
+    let d: any;
+
     const color_t_arr: Record<string, string> = {
-        "甲": "#2e7d32", "乙": "#4caf50", // 木（绿）
-        "丙": "#c62828", "丁": "#ef5350", // 火（红）
-        "戊": "#8d6e63", "己": "#a1887f", // 土（棕/黄）
-        "庚": "#f57c00", "辛": "#ffb74d", // 金（金黄）
-        "壬": "#1565c0", "癸": "#2196f3"  // 水（蓝）
-    };
-    // 地支五行颜色
-    const color_d_arr: Record<string, string> = {
-        "寅": "#4caf50", "卯": "#81c784", // 木
-        "巳": "#ef5350", "午": "#e57373", // 火
-        "辰": "#a1887f", "戌": "#a1887f", "丑": "#bcaaa4", "未": "#bcaaa4", // 土
-        "申": "#ffb74d", "酉": "#ffe082", // 金
-        "亥": "#2196f3", "子": "#64b5f6"  // 水
+        "甲": "#2e7d32", "乙": "#4caf50",
+        "丙": "#c62828", "丁": "#ef5350",
+        "戊": "#8d6e63", "己": "#a1887f",
+        "庚": "#f57c00", "辛": "#ffb74d",
+        "壬": "#1565c0", "癸": "#2196f3"
     };
 
-    // 十神关系表（以日干为中心推导其他天干的关系）
-    // 简化实现：gxarr[日干][目标天干] = 十神名称
+    const color_d_arr: Record<string, string> = {
+        "寅": "#4caf50", "卯": "#81c784",
+        "巳": "#ef5350", "午": "#e57373",
+        "辰": "#a1887f", "戌": "#a1887f", "丑": "#bcaaa4", "未": "#bcaaa4",
+        "申": "#ffb74d", "酉": "#ffe082",
+        "亥": "#2196f3", "子": "#64b5f6"
+    };
+
     const tenGodsMap: Record<string, Record<string, string>> = {
         "甲": { "甲": "比肩", "乙": "劫财", "丙": "食神", "丁": "伤官", "戊": "偏财", "己": "正财", "庚": "七杀", "辛": "正官", "壬": "偏印", "癸": "正印" },
         "乙": { "甲": "劫财", "乙": "比肩", "丙": "伤官", "丁": "食神", "戊": "正财", "己": "偏财", "庚": "正官", "辛": "七杀", "壬": "正印", "癸": "偏印" },
@@ -44,239 +37,279 @@
         "丁": { "甲": "正印", "乙": "偏印", "丙": "劫财", "丁": "比肩", "戊": "伤官", "己": "食神", "庚": "正财", "辛": "偏财", "壬": "正官", "癸": "七杀" },
         "戊": { "甲": "七杀", "乙": "正官", "丙": "偏印", "丁": "正印", "戊": "比肩", "己": "劫财", "庚": "食神", "辛": "伤官", "壬": "偏财", "癸": "正财" },
         "己": { "甲": "正官", "乙": "七杀", "丙": "正印", "丁": "偏印", "戊": "劫财", "己": "比肩", "庚": "伤官", "辛": "食神", "壬": "正财", "癸": "偏财" },
-        "庚": { "甲": "偏财", "乙": "正财", "丙": "食神", "丁": "伤官", "戊": "偏财", "己": "正财", "庚": "比肩", "辛": "劫财", "壬": "食神", "癸": "伤官" }, // 简易映射，可根据需要调整
-        "辛": { "甲": "正财", "乙": "偏财", "丙": "伤官", "丁": "食神", "戊": "正财", "己": "偏财", "庚": "劫财", "辛": "比肩", "壬": "伤官", "癸": "食神" },
-        "壬": { "甲": "食神", "乙": "伤官", "丙": "偏财", "丁": "正财", "戊": "七杀", "己": "正官", "庚": "偏印", "辛": "正印", "壬": "比肩", "癸": "劫财" },
-        "癸": { "甲": "伤官", "乙": "食神", "丙": "正财", "丁": "偏财", "戊": "正官", "己": "七杀", "庚": "正印", "辛": "偏印", "壬": "劫财", "癸": "比肩" }
+        "庚": { "甲": "偏财", "乙": "正財", "丙": "七殺", "丁": "正官", "戊": "偏印", "己": "正印", "庚": "比肩", "辛": "劫财", "壬": "食神", "癸": "傷官" },
+        "辛": { "甲": "正財", "乙": "偏財", "丙": "正官", "丁": "七殺", "戊": "正印", "己": "偏印", "庚": "劫財", "辛": "比肩", "壬": "傷官", "癸": "食神" },
+        "壬": { "甲": "食神", "乙": "傷官", "丙": "偏財", "丁": "正財", "戊": "七殺", "己": "正官", "庚": "偏印", "辛": "正印", "壬": "比肩", "癸": "劫財" },
+        "癸": { "甲": "傷官", "乙": "食神", "丙": "正財", "丁": "偏財", "戊": "正官", "己": "七殺", "庚": "正印", "辛": "偏印", "壬": "劫財", "癸": "比肩" }
     };
 
-    // 获取十神的辅助函数
     function getTenGod(dayStem: string, targetStem: string): string {
         if (!dayStem || !targetStem) return "";
         return tenGodsMap[dayStem]?.[targetStem] || "";
     }
 
-    // 大运数据结构定义
+    function safePillar(pillar: any) {
+        return {
+            stem: pillar?.stem?.toString() ?? "",
+            branch: pillar?.branch?.toString() ?? ""
+        };
+    }
+
+    function safeGanzhi(pillar: any): string {
+        const { stem, branch } = safePillar(pillar);
+        return stem && branch ? stem + branch : "";
+    }
+
+    function getYearGanzhi(year: number): string {
+        const stems = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+        const branches = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+        const offset = (year - 4) % 60;
+        const idx = offset < 0 ? offset + 60 : offset;
+        return stems[idx % 10] + branches[idx % 12];
+    }
+
+    function mapYearForLunisolar(year: number): number {
+        const MIN = 1901;
+        const MAX = 2099;
+        if (year >= MIN && year <= MAX) return year;
+        const offset = (year - MIN) % 60;
+        const mapped = MIN + (offset < 0 ? offset + 60 : offset);
+        return mapped > MAX ? mapped - 60 : mapped;
+    }
+
+    function getSafeYearGanzhi(year: number): string {
+        const mappedYear = mapYearForLunisolar(year);
+        try {
+            const lsr = lunisolar(new Date(mappedYear, 1, 5));
+            const gz = safeGanzhi(lsr.char8?.year);
+            if (gz) return gz;
+        } catch {}
+        return getYearGanzhi(year);
+    }
+
+    const ONE_DAY = 86400000;
+    const ONE_SHICHEN = 2 * 60 * 60 * 1000;
+
+    function resolveLuckDuration(totalDays: number) {
+        let remain = totalDays;
+        const years = Math.floor(remain / 3);
+        remain -= years * 3;
+        const months = Math.floor(remain * 4);
+        remain -= months / 4;
+        const days = Math.floor(remain);
+        remain -= days;
+        const shichen = Math.round(remain * ONE_DAY / ONE_SHICHEN);
+        return {
+            years, months, days, shichen,
+            desc: `${years}岁${months}个月${days}天${shichen}个时辰`
+        };
+    }
+
+    function calcLuckStartDateTime(birthTime: number, totalDays: number, isForward: boolean) {
+        const offset = totalDays * ONE_DAY;
+        return new Date(isForward ? birthTime + offset : birthTime - offset);
+    }
+
     interface LuckStep {
-        age: number; // 起运年龄
-        startYear: number; // 起运公历年份
-        ganzhi: string; // 大运干支
-        stem: string; // 大运天干
-        branch: string; // 大运地支
-        years: { year: number; ganzhi: string }[]; // 对应的 10 个流年
+        label: "小运" | "大运";   // ✅ 新增
+        age: number;              // 起始虚岁
+        startYear: number;         // 起始公历年
+        ganzhi: string;
+        stem: string;
+        branch: string;
+        years: { year: number; ganzhi: string }[];
+        luckStartDateTime: Date;
+        durationDesc: string;
     }
 
     let luckList: LuckStep[] = [];
-    let selectedLuckIndex = 0; // 当前选中的大运索引（用于展示流年）
-
-    function formatDateTime(dateInput: string) {
-        const date = new Date(dateInput);
-        if (isNaN(date.getTime())) return "Invalid Date";
-
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        const hours = String(date.getHours()).padStart(2, "0");
-        const minutes = String(date.getMinutes()).padStart(2, "0");
-
-        return `${year}/${month}/${day} ${hours}:${minutes}`;
-    }
+    let selectedLuckIndex = 0;
 
     function initLunisolar() {
-        d = lunisolar(formatDateTime(datetime));
-        calculateLuckAndYears();
+        try {
+            d = lunisolar(new Date(datetime));
+            calculateLuckAndYears();
+        } catch (e) {
+            console.error("初始化 lunisolar 失败：", e);
+            alert("解析八字失败，请检查输入的时间是否正确！");
+        }
     }
 
-    // 计算大运与流年 (完美适配 lunisolar 最新版本)
     function calculateLuckAndYears() {
         if (!d) return;
 
         const isMale = gender === "1";
-        
-        // 1. 获取八字的年干支、月干支
-        const yearStem = d.char8.year.stem.toString();   // 年干
-        const monthStem = d.char8.month.stem.toString(); // 月干
-        const monthBranch = d.char8.month.branch.toString(); // 月支
+        const yearStem = safePillar(d.char8.year).stem;
+        const monthStem = safePillar(d.char8.month).stem;
+        const monthBranch = safePillar(d.char8.month).branch;
 
-        // 2. 判断年干阴阳
-        const yangStems = ["甲", "丙", "戊", "庚", "壬"];
+        const yangStems = ["甲","丙","戊","庚","壬"];
         const isYangYear = yangStems.includes(yearStem);
-
-        // 3. 确定大运是顺排还是逆排 (阳男阴女顺排，阴男阳女逆排)
         const isForward = (isMale && isYangYear) || (!isMale && !isYangYear);
 
-        // 干支六十甲子表
-        const stems = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
-        const branches = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
+        const stems = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+        const branches = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
 
-        // 4. 起运年龄计算：
-        // 依据“三天折合一岁，一天折合四个月”计算。
-        // 我们通过当前节气（Solar Term）的日期差进行高精度推算：
-        let daysToSolarTerm = 3; 
-        try {
-            // 获取当前节气时刻以及相邻节气
-            const currentMs = d.value.getTime();
-            
-            // lunisolar 精确寻找最近的“节”（注意：大运要按“节”来算，而非“气”，比如立春、惊蛰等）
-            // 这里使用通用安全的逼近算法：
-            const currentYear = d.solar.year;
-            // 顺行找下一个节，逆行找上一个节
-            let targetTermTime = currentMs;
-            
-            // 简单且极其安全的算法：通过 lunisolar 的节气表获取
-            const termList = [];
-            for (let i = -1; i <= 1; i++) {
-                const tempLuni = lunisolar(`${currentYear + i}/06/01`);
-                // 收集当年的24节气时间
-                for (let t = 0; t < 24; t++) {
-                    // 过滤出单数（即“节”：立春、惊蛰、清明、立夏、芒种、小暑、立秋、白露、寒露、立冬、大雪、小寒）
-                    if (t % 2 === 1) {
-                        const term = tempLuni.getSolarTerm(t);
-                        termList.push(term.value.getTime());
-                    }
-                }
-            }
-            termList.sort((a, b) => a - b);
+        const birthYear = d.toDate().getFullYear();
+        const currentMs = d.valueOf();
 
-            if (isForward) {
-                // 顺行：找到大于当前时间的第一个“节”
-                const nextSection = termList.find(t => t > currentMs);
-                if (nextSection) {
-                    daysToSolarTerm = (nextSection - currentMs) / (1000 * 60 * 60 * 24);
+        let daysToSolarTerm = 3;
+        let luckStartDateTime: Date | null = null;
+
+        if (birthYear < 2100) {
+            try {
+                const [currentTerm, currentTermDate] = d.recentSolarTerm(0);
+                const currentTermValue = currentTerm.value;
+                const currentTermTime = currentTermDate.getTime();
+
+                let prevTermDate: Date;
+                let nextTermDate: Date;
+
+                if (currentTermTime >= currentMs) {
+                    nextTermDate = currentTermDate;
+                    const prevTermValue = currentTermValue >= 2 ? currentTermValue - 2 : 22;
+                    const [y, m, day] = lunisolar.SolarTerm.findDate(birthYear, prevTermValue);
+                    prevTermDate = new Date(y, m - 1, day);
+                } else {
+                    prevTermDate = currentTermDate;
+                    const nextTermValue = currentTermValue <= 20 ? currentTermValue + 2 : 0;
+                    const targetYear = currentTermValue <= 20 ? birthYear : birthYear + 1;
+                    const [y, m, day] = lunisolar.SolarTerm.findDate(targetYear, nextTermValue);
+                    nextTermDate = new Date(y, m - 1, day);
                 }
-            } else {
-                // 逆行：找到小于当前时间的最后一个“节”
-                const prevSections = termList.filter(t => t < currentMs);
-                if (prevSections.length > 0) {
-                    const prevSection = prevSections[prevSections.length - 1];
-                    daysToSolarTerm = (currentMs - prevSection) / (1000 * 60 * 60 * 24);
+
+                if (isForward) {
+                    daysToSolarTerm = (nextTermDate.getTime() - currentMs) / ONE_DAY;
+                } else {
+                    daysToSolarTerm = (currentMs - prevTermDate.getTime()) / ONE_DAY;
                 }
+
+                if (!Number.isFinite(daysToSolarTerm) || daysToSolarTerm < 0) {
+                    daysToSolarTerm = 3;
+                }
+
+                luckStartDateTime = calcLuckStartDateTime(currentMs, daysToSolarTerm, isForward);
+            } catch (e) {
+                console.warn("大运起岁计算失败，使用默认值", e);
+                daysToSolarTerm = 3;
+                luckStartDateTime = calcLuckStartDateTime(d.valueOf(), daysToSolarTerm, isForward);
             }
-        } catch (e) {
-            console.warn("节气大运起岁计算失败，启用保底默认值", e);
+        } else {
+            daysToSolarTerm = 3;
+            luckStartDateTime = calcLuckStartDateTime(d.valueOf(), daysToSolarTerm, isForward);
         }
 
-        // 3天 = 1岁， 1天 = 120天。四舍五入。
-        let startAge = Math.max(1, Math.round(daysToSolarTerm / 3)); 
-        const birthYear = d.solar.year; // 出生公历年
-        const startYear = birthYear + startAge;
+        // ✅ 起运虚岁（向上取整）
+        const startAge = Math.max(1, Math.ceil(daysToSolarTerm / 3));
 
-        // 5. 从月柱干支开始顺推或逆推 8 步大运
-        let currentStemIdx = stems.indexOf(monthStem);
-        let currentBranchIdx = branches.indexOf(monthBranch);
+        // ✅ 起运公历年份 = 交运时间点实际所在的年份（不做任何+1）
+        const startYear = luckStartDateTime.getFullYear();
 
-        luckList = Array.from({ length: 8 }, (_, index) => {
-            // 递推干支索引
+        const duration = resolveLuckDuration(daysToSolarTerm);
+
+        let stemIdx = stems.indexOf(monthStem);
+        let branchIdx = branches.indexOf(monthBranch);
+
+        const minorStemIdx = stems.indexOf(monthStem);
+        const minorBranchIdx = branches.indexOf(monthBranch);
+        const minorGanzhi = stems[minorStemIdx] + branches[minorBranchIdx];
+
+        luckList = [];
+
+        // 1️⃣ 小运
+        luckList.push({
+            label: "小运",
+            age: 1,
+            startYear: birthYear,
+            ganzhi: minorGanzhi,
+            stem: monthStem,
+            branch: monthBranch,
+            years: Array.from({ length: startAge }, (_, y) => ({
+                year: birthYear + y,
+                ganzhi: getSafeYearGanzhi(birthYear + y)
+            })),
+            luckStartDateTime,
+            durationDesc: duration.desc
+        });
+
+        // 2️⃣ 第一步大运真正开始的年份
+        const realLuckStartYear = startYear + startAge;
+
+        // 3️⃣ 11 步大运
+        for (let i = 0; i < 11; i++) {
             if (isForward) {
-                currentStemIdx = (currentStemIdx + 1) % 10;
-                currentBranchIdx = (currentBranchIdx + 1) % 12;
+                stemIdx = (stemIdx + 1) % 10;
+                branchIdx = (branchIdx + 1) % 12;
             } else {
-                currentStemIdx = (currentStemIdx - 1 + 10) % 10;
-                currentBranchIdx = (currentBranchIdx - 1 + 12) % 12;
+                stemIdx = (stemIdx - 1 + 10) % 10;
+                branchIdx = (branchIdx - 1 + 12) % 12;
             }
 
-            const stem = stems[currentStemIdx];
-            const branch = branches[currentBranchIdx];
-            const ganzhiStr = stem + branch;
+            const ganzhi = stems[stemIdx] + branches[branchIdx];
+            const luckStartAge = startAge + 1 + i * 10;
+            const luckStartYear = realLuckStartYear + i * 10;
 
-            const currentAge = startAge + index * 10;
-            const currentStartYear = startYear + index * 10;
-
-            // 生成这步大运 10 年的流年
-            const years = Array.from({ length: 10 }, (_, i) => {
-                const yr = currentStartYear + i;
-                // 计算流年干支（以公元4年甲子为基准进行偏移计算）
-                let offset = (yr - 4) % 60;
-                if (offset < 0) offset += 60;
-                const yrStem = stems[offset % 10];
-                const yrBranch = branches[offset % 12];
-                return {
-                    year: yr,
-                    ganzhi: yrStem + yrBranch
-                };
+            luckList.push({
+                label: "大运",
+                age: luckStartAge,
+                startYear: luckStartYear,
+                ganzhi,
+                stem: stems[stemIdx],
+                branch: branches[branchIdx],
+                years: Array.from({ length: 10 }, (_, y) => ({
+                    year: luckStartYear + y,
+                    ganzhi: getSafeYearGanzhi(luckStartYear + y)
+                })),
+                luckStartDateTime,
+                durationDesc: duration.desc
             });
-
-            return {
-                age: currentAge,
-                startYear: currentStartYear,
-                ganzhi: ganzhiStr,
-                stem,
-                branch,
-                years
-            };
-        });
+        }
 
         selectedLuckIndex = 0;
     }
 
-    // 日期格式合法性检查
-    function isValidDate(dateStr: string): boolean {
-        if (!dateStr) return false;
-        const regex = /^\d{4}-\d{2}-\d{2}$/;
-        if (!regex.test(dateStr)) return false;
-        const parsedDate = new Date(dateStr);
-        return !isNaN(parsedDate.getTime());
-    }
-
     function reinit() {
-        if (date && time && isValidDate(date)) {
+        if (date && time) {
             datetime = `${date}T${time}`;
-            try {
-                initLunisolar();
-            } catch (e) {
-                alert("解析八字失败，请输入正确的公历日期！");
-            }
+            initLunisolar();
         } else {
             alert("请输入正确的日期和时间！");
         }
     }
 
-    onMount(() => {
-        initLunisolar();
-    });
+    onMount(initLunisolar);
 </script>
 
 <Header />
 <div class="main">
     <div class="container">
-        <!-- 1. 选择出生日期与时间 -->
+
         <div class="picker-card">
             <h3>选择出生日期与时间</h3>
-            
             <div class="input-group">
                 <div class="input-field">
-                    <label for="start">出生日期</label>
-                    <input type="date" id="start" bind:value={date} min="1900-01-01" max="2100-12-31" />
+                    <label>出生日期</label>
+                    <input type="date" bind:value={date} max="2100-12-31" />
                 </div>
                 <div class="input-field">
-                    <label for="appt">出生时间</label>
-                    <input type="time" id="appt" bind:value={time} min="00:00" max="23:59" step="600" />
+                    <label>出生时间</label>
+                    <input type="time" bind:value={time} />
                 </div>
                 <div class="input-field">
                     <label>性别</label>
                     <div class="gender-radio-group">
-                        <label class="radio-label">
-                            <input type="radio" name="gender" value="1" bind:group={gender} />
-                            <span>男 (乾造)</span>
-                        </label>
-                        <label class="radio-label">
-                            <input type="radio" name="gender" value="0" bind:group={gender} />
-                            <span>女 (坤造)</span>
-                        </label>
+                        <label><input type="radio" value="1" bind:group={gender} /> 男</label>
+                        <label><input type="radio" value="0" bind:group={gender} /> 女</label>
                     </div>
                 </div>
             </div>
-
-            <button on:click={reinit} class="query-btn">查询八字</button>
+            <button class="query-btn" on:click={reinit}>查询八字</button>
         </div>
 
         {#if d}
-            <!-- 2. 八字排盘结果 -->
             <div class="result-card">
                 <div class="gender-indicator">
-                    性别：<span class={gender === "1" ? "male-text" : "female-text"}>
-                        {gender === "1" ? "乾造 (男)" : "坤造 (女)"}
-                    </span>
+                    性别：{gender === "1" ? "乾造 (男)" : "坤造 (女)"}
                 </div>
 
                 <table class="table-c">
@@ -290,51 +323,33 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- 天干行 -->
                         <tr class="tian-tr">
                             <td>天干</td>
-                            <td style="color:{color_t_arr[d.char8.year.stem.toString()]}">
-                                <i>{getTenGod(d.char8.day.stem.toString(), d.char8.year.stem.toString())}</i><br>
-                                <span class="gz-large">{d.char8.year.stem.toString()}</span>
-                            </td>
-                            <td style="color:{color_t_arr[d.char8.month.stem.toString()]}">
-                                <i>{getTenGod(d.char8.day.stem.toString(), d.char8.month.stem.toString())}</i><br>
-                                <span class="gz-large">{d.char8.month.stem.toString()}</span>
-                            </td>
-                            <td class="self-td" style="color:{color_t_arr[d.char8.day.stem.toString()]}">
-                                <i>日主 (己身)</i><br>
-                                <span class="gz-large">{d.char8.day.stem.toString()}</span>
-                            </td>
-                            <td style="color:{color_t_arr[d.char8.hour.stem.toString()]}">
-                                <i>{getTenGod(d.char8.day.stem.toString(), d.char8.hour.stem.toString())}</i><br>
-                                <span class="gz-large">{d.char8.hour.stem.toString()}</span>
-                            </td>
+                            {#each [d.char8.year, d.char8.month, d.char8.day, d.char8.hour] as p}
+                                {@const sp = safePillar(p)}
+                                <td style="color:{color_t_arr[sp.stem]}">
+                                    <i>{getTenGod(safePillar(d.char8.day).stem, sp.stem)}</i><br>
+                                    <span class="gz-large">{sp.stem}</span>
+                                </td>
+                            {/each}
                         </tr>
-                        <!-- 地支行 -->
                         <tr>
                             <td>地支</td>
-                            <td style="color:{color_d_arr[d.char8.year.branch.toString()]}">
-                                <span class="gz-large">{d.char8.year.branch.toString()}</span>
-                            </td>
-                            <td style="color:{color_d_arr[d.char8.month.branch.toString()]}">
-                                <span class="gz-large">{d.char8.month.branch.toString()}</span>
-                            </td>
-                            <td style="color:{color_d_arr[d.char8.day.branch.toString()]}">
-                                <span class="gz-large">{d.char8.day.branch.toString()}</span>
-                            </td>
-                            <td style="color:{color_d_arr[d.char8.hour.branch.toString()]}">
-                                <span class="gz-large">{d.char8.hour.branch.toString()}</span>
-                            </td>
+                            {#each [d.char8.year, d.char8.month, d.char8.day, d.char8.hour] as p}
+                                {@const sp = safePillar(p)}
+                                <td style="color:{color_d_arr[sp.branch]}">
+                                    <span class="gz-large">{sp.branch}</span>
+                                </td>
+                            {/each}
                         </tr>
-                        <!-- 藏干行 -->
                         <tr class="cang">
                             <td>藏干</td>
-                            {#each [d.char8.year.branch, d.char8.month.branch, d.char8.day.branch, d.char8.hour.branch] as branch}
+                            {#each [d.char8.year, d.char8.month, d.char8.day, d.char8.hour] as p}
                                 <td class="cang-item">
-                                    {#each branch.hiddenStems as stem}
-                                        {@const stemStr = stem.toString()}
-                                        <div class="cang-stem-box" style="color:{color_t_arr[stemStr]}">
-                                            {stemStr} <span class="cang-god">{getTenGod(d.char8.day.stem.toString(), stemStr)}</span>
+                                    {#each p?.branch?.hiddenStems || [] as hs}
+                                        {@const stem = hs.toString()}
+                                        <div style="color:{color_t_arr[stem]}">
+                                            {stem} <span>{getTenGod(safePillar(d.char8.day).stem, stem)}</span>
                                         </div>
                                     {/each}
                                 </td>
@@ -344,51 +359,62 @@
                 </table>
             </div>
 
-            <!-- 3. 大运排盘模块 -->
+            {#if luckList.length > 0}
+                <div class="minor-luck-notice">
+                    ⚠️ 起运前（{luckList[0].durationDesc}）为 <b>小运</b> 阶段，{luckList[0].age} 虚岁起正式走大运
+                </div>
+            {/if}
+
             <div class="luck-section">
-                <h3 class="section-title">📊 大运排盘 <small>（点击大运卡片查看对应流年）</small></h3>
+                <h3>📊 大运 / 小运排盘</h3>
                 <div class="luck-grid">
-                    {#each luckList as luck, index}
-                        <button 
-                            class="luck-card" 
-                            class:active={selectedLuckIndex === index}
-                            on:click={() => selectedLuckIndex = index}
+                    {#each luckList as luck, i}
+                        <button
+                            class="luck-card"
+                            class:active={i === selectedLuckIndex}
+                            class:minor={luck.label === '小运'}
+                            on:click={() => selectedLuckIndex = i}
                         >
-                            <div class="luck-age">{luck.age} 岁起</div>
+                            <div class="luck-label">{luck.label}</div>
+                            <div>{luck.age} 虚岁起</div>
                             <div class="luck-ganzhi">
-                                <span style="color:{color_t_arr[luck.stem]}">{luck.stem}</span><span style="color:{color_d_arr[luck.branch]}">{luck.branch}</span>
+                                <span style="color:{color_t_arr[luck.stem]}">{luck.stem}</span>
+                                <span style="color:{color_d_arr[luck.branch]}">{luck.branch}</span>
                             </div>
-                            <div class="luck-year">{luck.startYear} 年</div>
+                            <div>{luck.startYear} 年</div>
+                            {#if luck.label === '小运'}
+                                <div class="luck-time">
+                                    小运期：{luck.years.length} 年
+                                </div>
+                            {:else}
+                                <div class="luck-time">
+                                    交运：{luck.luckStartDateTime.toLocaleString()}
+                                </div>
+                            {/if}
+                            <div class="luck-duration">
+                                起运：{luck.durationDesc}
+                            </div>
                         </button>
                     {/each}
                 </div>
             </div>
 
-            <!-- 4. 流年排盘模块 -->
             {#if luckList[selectedLuckIndex]}
                 <div class="year-section">
-                    <h3 class="section-title">
-                        📅 【{luckList[selectedLuckIndex].ganzhi}】大运对应的流年 
-                        <span class="luck-span-age">({luckList[selectedLuckIndex].age}岁 - {luckList[selectedLuckIndex].age + 9}岁)</span>
-                    </h3>
+                    <h3>📅 {luckList[selectedLuckIndex].ganzhi} 大运 · 流年（{luckList[selectedLuckIndex].age}–{luckList[selectedLuckIndex].age + 9} 虚岁）</h3>
                     <div class="year-grid">
                         {#each luckList[selectedLuckIndex].years as yr}
                             <div class="year-card">
-                                <div class="yr-num">{yr.year} 年</div>
+                                <div>{yr.year}</div>
                                 <div class="yr-ganzhi">
-                                    <span style="color:{color_t_arr[yr.ganzhi.charAt(0)]}">{yr.ganzhi.charAt(0)}</span><span style="color:{color_d_arr[yr.ganzhi.charAt(1)]}">{yr.ganzhi.charAt(1)}</span>
+                                    <span style="color:{color_t_arr[yr.ganzhi[0]]}">{yr.ganzhi[0]}</span>
+                                    <span style="color:{color_d_arr[yr.ganzhi[1]]}">{yr.ganzhi[1]}</span>
                                 </div>
-                                <div class="yr-age">{luckList[selectedLuckIndex].age + (yr.year - luckList[selectedLuckIndex].startYear)} 岁</div>
                             </div>
                         {/each}
                     </div>
                 </div>
             {/if}
-
-        {:else}
-            <div class="result-card" style="text-align: center; color: #888;">
-                正在加载排盘数据...
-            </div>
         {/if}
     </div>
 </div>
@@ -456,21 +482,6 @@
         align-items: center;
     }
 
-    .radio-label {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        cursor: pointer;
-        font-size: 15px;
-        user-select: none;
-    }
-
-    .radio-label input[type="radio"] {
-        width: 18px;
-        height: 18px;
-        cursor: pointer;
-    }
-
     .query-btn {
         background: #007acc;
         color: white;
@@ -502,14 +513,6 @@
         text-align: left;
         border-left: 4px solid #007acc;
         padding-left: 10px;
-    }
-    
-    .male-text {
-        color: #007acc;
-    }
-
-    .female-text {
-        color: #e040fb;
     }
 
     .table-c {
@@ -546,20 +549,6 @@
         padding: 10px !important;
     }
 
-    .cang-stem-box {
-        margin: 6px 0;
-        font-size: 16px;
-        font-weight: bold;
-    }
-
-    .cang-god {
-        font-size: 12px;
-        color: #666;
-        font-weight: normal;
-        margin-left: 4px;
-    }
-
-    /* ================= 大运流年样式 ================= */
     .luck-section, .year-section {
         background: white;
         border-radius: 12px;
@@ -568,28 +557,6 @@
         margin-bottom: 30px;
     }
 
-    .section-title {
-        font-size: 20px;
-        color: #333;
-        margin-bottom: 20px;
-        border-left: 4px solid #007acc;
-        padding-left: 12px;
-        text-align: left;
-    }
-
-    .section-title small {
-        font-size: 14px;
-        color: #888;
-        font-weight: normal;
-    }
-
-    .luck-span-age {
-        font-size: 15px;
-        color: #666;
-        font-weight: normal;
-    }
-
-    /* 大运卡片网格：响应式自适应列宽 */
     .luck-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -619,24 +586,33 @@
         box-shadow: 0 4px 12px rgba(0, 122, 204, 0.15);
     }
 
-    .luck-age {
-        font-size: 13px;
-        color: #666;
-        margin-bottom: 4px;
-    }
-
     .luck-ganzhi {
         font-size: 24px;
         font-weight: bold;
         margin-bottom: 4px;
     }
 
-    .luck-year {
-        font-size: 12px;
-        color: #999;
+    .luck-time {
+        font-size: 11px;
+        color: #666;
+        margin-top: 4px;
     }
 
-    /* 流年卡片网格：5列自适应排版 */
+    .luck-duration {
+        font-size: 11px;
+        color: #888;
+    }
+
+    .minor-luck-notice {
+        background: #fff8e1;
+        border: 1px solid #ffd54f;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        color: #856404;
+    }
+
     .year-grid {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
@@ -649,13 +625,6 @@
         border-radius: 8px;
         padding: 12px 6px;
         text-align: center;
-        box-shadow: inset 0 0 4px rgba(0,0,0,0.02);
-    }
-
-    .yr-num {
-        font-size: 12px;
-        color: #888;
-        margin-bottom: 2px;
     }
 
     .yr-ganzhi {
@@ -663,13 +632,18 @@
         font-weight: bold;
         margin-bottom: 2px;
     }
-
-    .yr-age {
-        font-size: 12px;
-        color: #666;
+    .luck-card.minor {
+        background: #fffbe6;
+        border-color: #faad14;
     }
 
-    /* 移动端媒体查询调整 */
+    .luck-label {
+        font-size: 12px;
+        font-weight: bold;
+        color: #666;
+        margin-bottom: 4px;
+    }
+
     @media (max-width: 768px) {
         .input-group {
             flex-direction: column;
@@ -681,10 +655,10 @@
             margin-top: 5px;
         }
         .luck-grid {
-            grid-template-columns: repeat(4, 1fr); /* 移动端一行显示4个大运 */
+            grid-template-columns: repeat(4, 1fr);
         }
         .year-grid {
-            grid-template-columns: repeat(2, 1fr); /* 移动端一行显示2个流年 */
+            grid-template-columns: repeat(2, 1fr);
         }
     }
 </style>
