@@ -117,10 +117,10 @@
                     </tr>
                     <tr class="cang">
                         <td>藏干</td>
-                        {#each [d.char8.year, d.char8.month, d.char8.day, d.char8.hour] as pillar}
+                        {#each [d.char8.year.branch, d.char8.month.branch, d.char8.day.branch, d.char8.hour.branch] as branch}
                             <td class="cang-item">
-                                {#each pillar.branch.hiddenStems.toString().split(",") as item}
-                                    <span style="color:{color_t_arr[item]}">{item} <i>{gxarr[item]}</i></span>
+                                {#each branch.hiddenStems.toString().split(",") as item}
+                                    <span style="color:{color_t_arr[item]}">{item} <i>{gxarr[item] || ''}</i></span>
                                 {/each}
                             </td>
                         {/each}
