@@ -54,31 +54,48 @@
     function calculateLuckAndYears() {
         if (!d) return;
 
-        // 获取 lunisolar 自带的八字大运实例
-        // gender: 1为男，0为女
         const isMale = gender === "1";
-        const luck = d.char8.luck(isMale);
         
-        // 起运岁数（实岁/虚岁，这里取实岁或大运提供的起运岁数数）
-        const startAge = luck.rates.age; // 几岁起运
-        const startYear = luck.rates.year; // 几岁起运对应的公历年份
+        // 1. 核心纠错：在 lunisolar 中，大运实例是通过 d.char8.getLuck(isMale) 
+        // 或者 d.char8.luck 属性（注意：在部分版本中它是一个 Getter 属性或需要通过 getLuck 获取）
+        // 我们这里做一下安全兼容处理：
+        let luck;
+        if (typeof d.char8.getLuck === 'function') {
+            luck = d.char8.getLuck(isMale);
+        } else if (typeof d.char8.luck === 'function') {
+            luck = d.char8.luck(isMale);
+        } else {
+            // 降级兼容：如果由于版本差异无法直接获取，手动使用 lunisolar 提供的基本数据进行简单推算
+            // 或者尝试直接读取属性
+            luck = (d.char8 as any).luck;
+        }
+
+        if (!luck || !luck.rates) {
+            console.error("无法获取大运数据，请检查 lunisolar 的 theGods 插件是否成功加载。");
+            return;
+        }
         
-        // 获取大运干支列表（通常看 8 步大运）
+        // 起运岁数（几岁起运）
+        const startAge = luck.rates.age; 
+        const startYear = luck.rates.year; // 起运对应的公历年份
+        
+        // 获取大运干支列表
         const list = luck.list; 
         
-        luckList = list.map((item, index) => {
+        luckList = list.map((item: any, index: number) => {
             // 计算当前大运的起运年龄和公历年
             const currentAge = startAge + index * 10;
             const currentStartYear = startYear + index * 10;
-            const ganzhiStr = item.ganzhi.toString(); // 比如 "甲子"
+            
+            // 兼容干支字符的获取
+            const ganzhiStr = typeof item.ganzhi === 'string' ? item.ganzhi : item.ganzhi.toString();
             const stem = ganzhiStr.charAt(0);
             const branch = ganzhiStr.charAt(1);
 
             // 生成这步大运 10 年的流年数据
             const years = Array.from({ length: 10 }, (_, i) => {
                 const yr = currentStartYear + i;
-                // 利用 lunisolar 解析该流年的干支
-                const yrLunisolar = lunisolar(`${yr}/06/01`); // 用该年年中定位当年干支
+                const yrLunisolar = lunisolar(`${yr}/06/01`); 
                 return {
                     year: yr,
                     ganzhi: yrLunisolar.char8.year.toString()
@@ -95,7 +112,6 @@
             };
         });
 
-        // 默认选中第一步大运
         selectedLuckIndex = 0;
     }
 
@@ -190,7 +206,7 @@
                                 <i>{gxarr[d.char8.month.stem.toString()]?.[d.char8.month.stem.toString()] || ''}</i><br>{d.char8.month.stem.toString()}
                             </td>
                             <td class="self-td" style="color:{color_t_arr[d.char8.day.stem.toString()]}">
-                                <br>{d.char8.day.stem.toString()}
+                                <i>{gender === "1" ? "乾造 (男)" : "坤造 (女)"}</i><br>{d.char8.day.stem.toString()}
                             </td>
                             <td style="color:{color_t_arr[d.char8.hour.stem.toString()]}">
                                 <i>{gxarr[d.char8.hour.stem.toString()]?.[d.char8.hour.stem.toString()] || ''}</i><br>{d.char8.hour.stem.toString()}
