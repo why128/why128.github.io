@@ -16,7 +16,7 @@
     let gender = "1"; 
 
     let d: lunisolar.Lunisolar;
-
+    d = lunisolar(formatDateTime(datetime));
     // --- 内置常用易学常量（防止 ./emun 引入报错） ---
     // 天干五行颜色
     const color_t_arr: Record<string, string> = {
