@@ -1,23 +1,45 @@
 <script lang="ts">
     import Header from "@/views/header/Index.svelte";
     import Footer from "@/views/footer/Index.svelte";
-    import supabase from "$lib/supabase";
     import { onMount } from "svelte";
     import { formatTime } from "$lib/util";
     import Diago from "@/component/diago.svelte";
+
     // 获取url id
     let loading = true;
     export let params: { [key: string]: string };
+
+    // TS 接口
     interface Post {
         id: number;
         title: string;
         date: string;
         excerpt: string;
         content: string;
-        link: string; // 文章链接
-        readTime?: number; // 可选：阅读时间
+        link: string;
+        readTime?: number;
     }
-    let post: Post | null = null;
+
+    // === 临时硬编码详情数据（服务器修复后可删除）===
+    let post: Post | null = {
+        id: 1,
+        title: "欢迎来到我的博客空间",
+        date: new Date().toISOString(),
+        excerpt: "这里记录我的思考、学习笔记和生活点滴。感谢你的到来！",
+        content: `
+            <p>你好！我是 why128，很高兴你能来到这里。</p>
+            <p>这个博客是我用 Svelte + Supabase 搭建的个人空间，未来会持续分享技术文章、日常随笔和一些有趣的项目。</p>
+            <p>如果你有任何想法或建议，欢迎随时留言交流～</p>
+            <p>祝你阅读愉快！</p>
+        `,
+        link: "/detail",
+        readTime: 5
+    };
+
+    // === 原 Supabase 请求逻辑（已注释，服务器恢复后取消注释即可）===
+    /*
+    import supabase from "$lib/supabase";
+
     async function getData(id: number) {
         const { data, error } = await supabase
             .from("githubio_list")
@@ -30,7 +52,7 @@
         }
         post = data[0];
         //增加浏览记录的值
-        const currentReadTime = post?.readTime || 0; // 确保 readtime 为数字，默认为 0
+        const currentReadTime = post?.readTime || 0;
         const newReadTime = currentReadTime + 1;
         const { data: dataup, error: errorup } = await supabase
             .from("githubio_list")
@@ -43,10 +65,14 @@
         }
         loading = false;
     }
+    */
+
     onMount(() => {
-        //查询当前的博客日志
-        getData(Number(params.id));
+        // 查询当前的博客日志（暂时使用硬编码）
+        // getData(Number(params.id));
+        loading = false;
     });
+
     function goback() {
         window.location.hash = "#/";
     }
@@ -74,12 +100,11 @@
 <Footer />
 
 <style>
-    /* 脚注：简单居中 */
+    /* 原有样式保持不变 */
     .btn {
         padding: 0.5rem 1rem;
         border-radius: 0.25rem;
         border: 1px solid #ccc;
-        border-color: none;
         background-color: #fff;
         cursor: pointer;
         display: block;
