@@ -30,7 +30,16 @@
     }
 
     function reinit() {
-        initLunisolar();
+        if (date && time && isValidDate()) {
+            datetime = `${date}T${time}`;
+            try {
+                initLunisolar();
+            } catch (e) {
+                alert("请输入正确的日期和时间！");
+            }
+        }else {
+            alert("请输入正确的日期和时间！");
+        }
     }
 
     onMount(() => {
@@ -39,6 +48,7 @@
     // 增加一个校验函数，确保日期是完整的 YYYY-MM-DD 格式
     function isValidDate(dateStr: string): boolean {
         if (!dateStr) return false;
+        if (dateStr[0] !== '1' || dateStr[0] !== '2') return false;
         // 使用正则匹配 4位年-2位月-2位日
         const regex = /^\d{4}-\d{2}-\d{2}$/;
         if (!regex.test(dateStr)) return false;
@@ -47,7 +57,7 @@
         return !isNaN(d.getTime());
     }
 
-    $: {
+    /*$: {
         if (date && time && isValidDate(date)) {
             datetime = `${date}T${time}`;
             // 增加 try-catch 保护，防止第三方库因为非常规日期报错挂起页面
@@ -57,7 +67,7 @@
                 console.error("Lunisolar 解析失败:", e);
             }
         }
-    }
+    }*/
 </script>
 
 <Header />
