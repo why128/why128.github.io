@@ -101,16 +101,16 @@
                         <tr class="tian-tr">
                             <td>天干</td>
                             <td style="color:{color_t_arr[d.char8.year.stem.toString()]}">
-                                <i>{gxarr[d.char8.year.stem.toString()]?.[d.char8.year.stem.toString()] || ''}</i>{d.char8.year.stem.toString()}
+                                <i>{gxarr[d.char8.year.stem.toString()]?.[d.char8.year.stem.toString()] || ''}</i><br>{d.char8.year.stem.toString()}
                             </td>
                             <td style="color:{color_t_arr[d.char8.month.stem.toString()]}">
-                                <i>{gxarr[d.char8.month.stem.toString()]?.[d.char8.month.stem.toString()] || ''}</i>{d.char8.month.stem.toString()}
+                                <i>{gxarr[d.char8.month.stem.toString()]?.[d.char8.month.stem.toString()] || ''}</i><br>{d.char8.month.stem.toString()}
                             </td>
                             <td class="self-td" style="color:{color_t_arr[d.char8.day.stem.toString()]}">
-                                {d.char8.day.stem.toString()}
+                                <br>{d.char8.day.stem.toString()}
                             </td>
                             <td style="color:{color_t_arr[d.char8.hour.stem.toString()]}">
-                                <i>{gxarr[d.char8.hour.stem.toString()]?.[d.char8.hour.stem.toString()] || ''}</i>{d.char8.hour.stem.toString()}
+                                <i>{gxarr[d.char8.hour.stem.toString()]?.[d.char8.hour.stem.toString()] || ''}</i><br>{d.char8.hour.stem.toString()}
                             </td>
                         </tr>
                         <tr>
