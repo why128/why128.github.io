@@ -36,11 +36,26 @@
     onMount(() => {
         initLunisolar();
     });
+    // 增加一个校验函数，确保日期是完整的 YYYY-MM-DD 格式
+    function isValidDate(dateStr: string): boolean {
+        if (!dateStr) return false;
+        // 使用正则匹配 4位年-2位月-2位日
+        const regex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!regex.test(dateStr)) return false;
+        // 确保能被 JS Date 正确解析
+        const d = new Date(dateStr);
+        return !isNaN(d.getTime());
+    }
 
     $: {
-        if (date && time) {
+        if (date && time && isValidDate(date)) {
             datetime = `${date}T${time}`;
-            initLunisolar();
+            // 增加 try-catch 保护，防止第三方库因为非常规日期报错挂起页面
+            try {
+                initLunisolar();
+            } catch (e) {
+                console.error("Lunisolar 解析失败:", e);
+            }
         }
     }
 </script>
