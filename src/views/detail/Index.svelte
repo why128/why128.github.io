@@ -33,7 +33,7 @@
             <p>祝你阅读愉快！</p>
         `,
         link: "/detail",
-        readTime: 5
+        readTime: 5,
     };
 
     // === 原 Supabase 请求逻辑（已注释，服务器恢复后取消注释即可）===
@@ -59,9 +59,7 @@
             .eq("id", id)
             .update({ readTime: newReadTime }, { returning: "minimal" });
         if (errorup) {
-            console.error("递增 readtime 失败:", errorup);
         } else {
-            console.log("readtime 递增请求已发送成功。");
         }
         loading = false;
     }

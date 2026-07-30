@@ -47,6 +47,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@lunisolar/plugin-char8ex": "^0.2.5",
     "@supabase/supabase-js": "^2.86.0",
     "lunisolar": "^2.6.0",
     "svelte-spa-router": "^4.0.1",

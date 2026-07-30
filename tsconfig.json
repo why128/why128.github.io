@@ -14,7 +14,10 @@
         "paths": {
             "$lib/*": [
                 "src/lib/*"
-            ] // Svelte 别名，支持 import from '$lib'
+            ], // Svelte 别名，支持 import from '$lib'
+            "@/*": [
+                "src/*"
+            ]
         }
     },
     "include": [

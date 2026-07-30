@@ -28,8 +28,6 @@
 
     // 键盘事件处理函数
     function handleKeydown(event: KeyboardEvent): void {
-        console.log(`Key pressed: ${event.key}`);
-
         switch (event.key) {
             case "ArrowUp":
             case "w":
@@ -72,16 +70,11 @@
 
     // 初始化游戏
     onMount(() => {
-        console.log("Initializing game...");
         game = new SokobanGame(levels);
 
         // 初始加载第一关
         game.loadLevel(0);
         updateGameState();
-
-        console.log("Game initialized, current level:", game.getCurrentLevel());
-        console.log("Grid:", JSON.stringify(game.getGrid()));
-
         keydownHandler = handleKeydown;
         window.addEventListener("keydown", keydownHandler);
 
@@ -103,11 +96,6 @@
         currentLevel = game.getCurrentLevel();
         moves = game.getMoves();
         canUndo = game.canUndo();
-        console.log("Game state updated:", {
-            state: gameState,
-            level: currentLevel,
-            moves: moves,
-        });
 
         // 检查是否获胜
         checkWinCondition();
@@ -116,8 +104,6 @@
     // 检查获胜条件
     function checkWinCondition(): void {
         if (game && game.getState() === GameState.WON) {
-            console.log("Level completed! All boxes on targets.");
-
             // 延迟一小会儿弹出，让玩家看清最后一跳
             setTimeout(() => {
                 showWinModal = true;
@@ -146,8 +132,6 @@
 
         // 如果没有“裸露”的箱子了，说明所有箱子都在目标点上（变成了 BOX_ON_TARGET）
         if (!hasUnfinishedBox && moves > 0) {
-            console.log("Level completed! All boxes on targets.");
-
             // 延迟一小会儿弹出，让玩家看清最后一跳
             setTimeout(() => {
                 showWinModal = true;
@@ -196,8 +180,6 @@
 
     // 重置关卡
     function handleReset(): void {
-        console.log("Reset called");
-
         if (!game) {
             console.warn("Game is not initialized");
             return;
@@ -210,22 +192,15 @@
 
     // 开始游戏
     function handleStart(): void {
-        console.log("Start called");
-
         if (!game) {
-            console.warn("Game is not initialized");
             return;
         }
-
-        console.log("Loading level 0...");
         game.loadLevel(0);
 
         tick().then(() => {
             updateGameState();
             // 强制重新渲染
             forceRerender();
-            console.log("After start - Current level:", currentLevel);
-            console.log("After start - Grid:", JSON.stringify(game?.getGrid()));
         });
 
         playSound("start");
@@ -233,15 +208,11 @@
 
     // 上一关
     function handlePrevLevel(): void {
-        console.log("Prev level called");
-
         if (!game) {
-            console.warn("Game is not initialized");
             return;
         }
 
         const currentLvl = game.getCurrentLevel();
-        console.log("Current level before prev:", currentLvl);
 
         if (currentLvl > 0) {
             game.loadLevel(currentLvl - 1);
@@ -249,56 +220,33 @@
                 updateGameState();
                 // 强制重新渲染
                 forceRerender();
-                console.log("After prev level - Current level:", currentLevel);
-                console.log(
-                    "After prev level - Grid:",
-                    JSON.stringify(game?.getGrid()),
-                );
             });
         } else {
-            console.log("Already at first level");
         }
     }
 
     // 下一关
     function handleNextLevel(): void {
-        console.log("Next level called");
-
         if (!game) {
-            console.warn("Game is not initialized");
             return;
         }
-
         const currentLvl = game.getCurrentLevel();
-        console.log("Current level before next:", currentLvl);
-        console.log("Total levels:", levels.length);
-
         if (currentLvl < levels.length - 1) {
             game.loadLevel(currentLvl + 1);
             tick().then(() => {
                 updateGameState();
                 // 强制重新渲染
                 forceRerender();
-                console.log("After next level - Current level:", currentLevel);
-                console.log(
-                    "After next level - Grid:",
-                    JSON.stringify(game?.getGrid()),
-                );
             });
         } else {
-            console.log("Already at last level");
         }
     }
 
     // 重玩第一关
     function handleRestartFromFirst(): void {
-        console.log("Restart from first called");
-
         if (!game) {
-            console.warn("Game is not initialized");
             return;
         }
-
         game.loadLevel(0);
         tick().then(() => {
             updateGameState();
@@ -332,7 +280,6 @@
     // 强制重新渲染
     function forceRerender(): void {
         renderVersion++;
-        console.log("Force rerender, version:", renderVersion);
     }
 
     // 播放音效

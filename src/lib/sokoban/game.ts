@@ -82,8 +82,6 @@ export class SokobanGame {
         this.findPlayer();
         this.state = GameState.PLAYING;
 
-        console.log(`Loaded level ${levelIndex + 1}: ${this.levelData[levelIndex].name}`);
-
         return true;
     }
 
@@ -127,8 +125,6 @@ export class SokobanGame {
 
     // 移动玩家
     public move(direction: Direction): boolean {
-        // console.log(`Moving player in direction: ${direction}`);
-        console.log(`Current game state: ${this.state}`);
         if (this.state !== GameState.PLAYING) {
             console.warn('Cannot move: game is not in playing state');
             return false;
@@ -191,7 +187,6 @@ export class SokobanGame {
         // 检查是否获胜
         if (this.checkWin()) {
             this.state = GameState.WON;
-            console.log(`Level ${this.currentLevel + 1} completed in ${this.moves} moves!`);
         }
 
         return true;
