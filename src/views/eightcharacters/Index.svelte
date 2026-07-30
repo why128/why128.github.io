@@ -832,6 +832,9 @@
         max-width: 58px;
         font-weight: 600;
         background: #fafafa;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .bazi-head .bazi-cell {
