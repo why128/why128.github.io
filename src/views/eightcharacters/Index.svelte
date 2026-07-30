@@ -384,7 +384,7 @@
                 <div class="bazi-grid">
                     <!-- 表头 -->
                     <div class="bazi-row bazi-head">
-                        <div class="bazi-cell">八字</div>
+                        <div class="bazi-cell bazi-label">八字</div>
                         <div class="bazi-cell">年柱</div>
                         <div class="bazi-cell">月柱</div>
                         <div class="bazi-cell self">日柱</div>
