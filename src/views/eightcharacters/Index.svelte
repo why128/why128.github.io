@@ -14,6 +14,7 @@
     import theGods from "lunisolar/plugins/theGods";
     lunisolar.extend(theGods);
     lunisolar.extend(char8ex);
+
     let date = new Date().toISOString().substring(0, 10);
     let time = new Date().toTimeString().substring(0, 5);
     let datetime = `${date}T${time}`;
@@ -121,9 +122,9 @@
     }
 
     interface LuckStep {
-        label: "小运" | "大运"; // ✅ 新增
-        age: number; // 起始虚岁
-        startYear: number; // 起始公历年
+        label: "小运" | "大运";
+        age: number;
+        startYear: number;
         ganzhi: string;
         stem: string;
         branch: string;
@@ -257,12 +258,8 @@
             );
         }
 
-        // ✅ 起运虚岁（向上取整）
         const startAge = Math.max(1, Math.ceil(daysToSolarTerm / 3));
-
-        // ✅ 起运公历年份 = 交运时间点实际所在的年份（不做任何+1）
         const startYear = luckStartDateTime.getFullYear();
-
         const duration = resolveLuckDuration(daysToSolarTerm);
 
         let stemIdx = stems.indexOf(monthStem);
@@ -274,7 +271,6 @@
 
         luckList = [];
 
-        // 1️⃣ 小运
         luckList.push({
             label: "小运",
             age: 1,
@@ -290,10 +286,8 @@
             durationDesc: duration.desc,
         });
 
-        // 2️⃣ 第一步大运真正开始的年份
         const realLuckStartYear = startYear + startAge;
 
-        // 3️⃣ 11 步大运
         for (let i = 0; i < 11; i++) {
             if (isForward) {
                 stemIdx = (stemIdx + 1) % 10;
@@ -386,93 +380,100 @@
                     性别：{gender === "1" ? "乾造 (男)" : "坤造 (女)"}
                 </div>
 
-                <table class="table-c">
-                    <thead>
-                        <tr>
-                            <th>八字</th>
-                            <th>年柱</th>
-                            <th>月柱</th>
-                            <th class="self">日柱</th>
-                            <th>时柱</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="tian-tr">
-                            <td>天干</td>
-                            {#each [d.char8.year, d.char8.month, d.char8.day, d.char8.hour] as p, i}
-                                {@const sp = safePillar(p)}
+                <!-- ===== Flex 八字排盘：5 列永不变 ===== -->
+                <div class="bazi-grid">
+                    <!-- 表头 -->
+                    <div class="bazi-row bazi-head">
+                        <div class="bazi-cell">八字</div>
+                        <div class="bazi-cell">年柱</div>
+                        <div class="bazi-cell">月柱</div>
+                        <div class="bazi-cell self">日柱</div>
+                        <div class="bazi-cell">时柱</div>
+                    </div>
+
+                    <!-- 天干 -->
+                    <div class="bazi-row tian-tr">
+                        <div class="bazi-cell bazi-label">天干</div>
+                        {#each [d.char8.year, d.char8.month, d.char8.day, d.char8.hour] as p, i}
+                            {@const sp = safePillar(p)}
+                            <div
+                                class="bazi-cell"
+                                style="color:{i !== 2
+                                    ? color_t_arr[sp.stem]
+                                    : undefined}"
+                            >
                                 {#if i !== 2}
-                                    <td style="color:{color_t_arr[sp.stem]}">
-                                        <i
+                                    <i
+                                        >{getTenGod(
+                                            safePillar(d.char8.day).stem,
+                                            sp.stem,
+                                        )}</i
+                                    ><br />
+                                    <span class="gz-large">{sp.stem}</span>
+                                {:else}
+                                    <i>{gender === "1" ? "元男" : "元女"}</i><br
+                                    />
+                                    <span
+                                        class="gz-large"
+                                        style="color:{color_t_arr[sp.stem]}"
+                                        >{sp.stem}</span
+                                    >
+                                {/if}
+                            </div>
+                        {/each}
+                    </div>
+
+                    <!-- 地支 -->
+                    <div class="bazi-row">
+                        <div class="bazi-cell bazi-label">地支</div>
+                        {#each [d.char8.year, d.char8.month, d.char8.day, d.char8.hour] as p}
+                            {@const sp = safePillar(p)}
+                            <div
+                                class="bazi-cell"
+                                style="color:{color_d_arr[sp.branch]}"
+                            >
+                                <span class="gz-large">{sp.branch}</span>
+                            </div>
+                        {/each}
+                    </div>
+
+                    <!-- 藏干 -->
+                    <div class="bazi-row cang">
+                        <div class="bazi-cell bazi-label">藏干</div>
+                        {#each [d.char8.year, d.char8.month, d.char8.day, d.char8.hour] as p}
+                            <div class="bazi-cell cang-item">
+                                {#each p?.branch?.hiddenStems || [] as hs}
+                                    {@const stem = hs.toString()}
+                                    <div style="color:{color_t_arr[stem]}">
+                                        {stem}
+                                        <span
                                             >{getTenGod(
                                                 safePillar(d.char8.day).stem,
-                                                sp.stem,
-                                            )}</i
+                                                stem,
+                                            )}</span
                                         >
-                                        <br />
-                                        <span class="gz-large">{sp.stem}</span>
-                                    </td>
-                                {/if}
-                                {#if i === 2}
-                                    <td>
-                                        <i>{gender === "1" ? "元男" : "元女"}</i
-                                        >
-                                        <br />
-                                        <span
-                                            style="color:{color_t_arr[sp.stem]}"
-                                            class="gz-large">{sp.stem}</span
-                                        >
-                                    </td>
-                                {/if}
-                            {/each}
-                        </tr>
-                        <tr>
-                            <td>地支</td>
-                            {#each [d.char8.year, d.char8.month, d.char8.day, d.char8.hour] as p}
-                                {@const sp = safePillar(p)}
-                                <td style="color:{color_d_arr[sp.branch]}">
-                                    <span class="gz-large">{sp.branch}</span>
-                                </td>
-                            {/each}
-                        </tr>
-                        <tr class="cang">
-                            <td>藏干</td>
-                            {#each [d.char8.year, d.char8.month, d.char8.day, d.char8.hour] as p}
-                                <td class="cang-item">
-                                    {#each p?.branch?.hiddenStems || [] as hs}
-                                        {@const stem = hs.toString()}
-                                        <div style="color:{color_t_arr[stem]}">
-                                            {stem}
-                                            <span
-                                                >{getTenGod(
-                                                    safePillar(d.char8.day)
-                                                        .stem,
-                                                    stem,
-                                                )}</span
-                                            >
-                                        </div>
-                                    {/each}
-                                </td>
-                            {/each}
-                        </tr>
-                        {#if c8ex}
-                            <tr>
-                                <td>神煞</td>
-                                {#each [c8ex.year, c8ex.month, c8ex.day, c8ex.hour] as p}
-                                    <td class="shensha-item">
-                                        {#each p?.gods || [] as god}
-                                            <span class="god-tag"
-                                                >{getGodDisplayName(
-                                                    god.name,
-                                                )}</span
-                                            ><br />
-                                        {/each}
-                                    </td>
+                                    </div>
                                 {/each}
-                            </tr>
-                        {/if}
-                    </tbody>
-                </table>
+                            </div>
+                        {/each}
+                    </div>
+
+                    <!-- 神煞 -->
+                    {#if c8ex}
+                        <div class="bazi-row">
+                            <div class="bazi-cell bazi-label">神煞</div>
+                            {#each [c8ex.year, c8ex.month, c8ex.day, c8ex.hour] as p}
+                                <div class="bazi-cell shensha-item">
+                                    {#each p?.gods || [] as god}
+                                        <span class="god-tag"
+                                            >{getGodDisplayName(god.name)}</span
+                                        ><br />
+                                    {/each}
+                                </div>
+                            {/each}
+                        </div>
+                    {/if}
+                </div>
             </div>
 
             {#if luckList.length > 0}
@@ -651,41 +652,6 @@
         padding-left: 10px;
     }
 
-    .table-c {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .table-c th,
-    .table-c td {
-        text-align: center;
-        padding: 15px;
-        border: 1px solid #eee;
-    }
-
-    .table-c th {
-        background: #f0f0f0;
-        font-size: 18px;
-        font-weight: 600;
-    }
-
-    .self {
-        color: #d32f2f;
-        font-weight: bold;
-    }
-
-    .gz-large {
-        font-size: 28px;
-        font-weight: bold;
-        display: inline-block;
-        margin-top: 5px;
-    }
-
-    .cang-item {
-        vertical-align: top;
-        padding: 10px !important;
-    }
-
     .luck-section,
     .year-section {
         background: white;
@@ -770,14 +736,17 @@
         font-weight: bold;
         margin-bottom: 2px;
     }
+
     .luck-card.minor {
         background: #fffbe6;
         border-color: #faad14;
     }
+
     .shensha-item {
         padding: 10px !important;
         vertical-align: top;
     }
+
     .god-tag {
         display: inline-block;
         background: #f0f5ff;
@@ -787,7 +756,8 @@
         padding: 2px 6px;
         margin: 2px;
         font-size: 13px;
-        white-space: nowrap;
+        white-space: normal;
+        word-break: break-all;
     }
 
     .luck-label {
@@ -797,21 +767,142 @@
         margin-bottom: 4px;
     }
 
+    .gz-large {
+        font-size: 28px;
+        font-weight: bold;
+        display: inline-block;
+        margin-top: 5px;
+    }
+
+    .cang-item {
+        vertical-align: top;
+        padding: 10px !important;
+    }
+
+    .self {
+        color: #d32f2f;
+        font-weight: bold;
+    }
+
+    /* =========================================================
+       ✅ Flex 八字排盘：5 列永不变，只压缩宽度 / 字号 / 间距
+       ========================================================= */
+
+    .bazi-grid {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .bazi-row {
+        display: flex;
+        width: 100%;
+        border-bottom: 1px solid #eee;
+    }
+
+    .bazi-row:last-child {
+        border-bottom: none;
+    }
+
+    /*
+      关键规则：
+      - flex: 1 1 0 → 4 个干支柱等宽，且允许收缩
+      - min-width: 0 → 防止内容撑爆容器
+      - 第一列固定窄宽，不参与等分
+    */
+    .bazi-cell {
+        flex: 1 1 0;
+        min-width: 0;
+        text-align: center;
+        padding: 15px 6px;
+        border-right: 1px solid #eee;
+        box-sizing: border-box;
+    }
+
+    .bazi-cell:last-child {
+        border-right: none;
+    }
+
+    /* 第一列（标签列）固定窄宽 */
+    .bazi-label {
+        flex: 0 0 58px;
+        max-width: 58px;
+        font-weight: 600;
+        background: #fafafa;
+    }
+
+    .bazi-head .bazi-cell {
+        background: #f0f0f0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    /* ===== 窄屏适配：只缩，不改列数 ===== */
     @media (max-width: 768px) {
-        .input-group {
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
+        .gz-large {
+            font-size: 22px;
         }
-        .gender-radio-group {
-            height: auto;
-            margin-top: 5px;
+
+        .bazi-cell {
+            padding: 10px 3px;
         }
-        .luck-grid {
-            grid-template-columns: repeat(4, 1fr);
+
+        .bazi-label {
+            flex: 0 0 46px;
+            max-width: 46px;
+            font-size: 13px;
         }
-        .year-grid {
-            grid-template-columns: repeat(2, 1fr);
+
+        .bazi-head .bazi-cell {
+            font-size: 15px;
+        }
+
+        .god-tag {
+            font-size: 11px;
+            padding: 1px 4px;
+        }
+
+        .cang-item div {
+            font-size: 12px;
+        }
+    }
+
+    @media (max-width: 420px) {
+        .gz-large {
+            font-size: 18px;
+        }
+
+        .bazi-cell {
+            padding: 8px 2px;
+        }
+
+        .bazi-label {
+            flex: 0 0 40px;
+            max-width: 40px;
+            font-size: 12px;
+        }
+
+        .bazi-head .bazi-cell {
+            font-size: 13px;
+        }
+
+        .god-tag {
+            font-size: 10px;
+            padding: 1px 3px;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .gz-large {
+            font-size: 16px;
+        }
+
+        .bazi-label {
+            flex: 0 0 36px;
+            max-width: 36px;
         }
     }
 </style>
