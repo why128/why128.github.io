@@ -255,9 +255,13 @@ export class SokobanGame {
     private checkWin(): boolean {
         for (let y = 0; y < this.grid.length; y++) {
             for (let x = 0; x < this.grid[y].length; x++) {
-                if (this.grid[y][x] === TileType.TARGET ||
-                    this.grid[y][x] === TileType.PLAYER_ON_TARGET) {
-                    // 还有未覆盖的目标点
+                // 只要还有裸露的 TARGET（上面没有箱子），就未赢
+                // PLAYER_ON_TARGET 不影响胜负（玩家站在目标点上是允许的）
+                if (this.grid[y][x] === TileType.TARGET) {
+                    return false;
+                }
+                // 还有普通箱子未入目标，也未赢
+                if (this.grid[y][x] === TileType.BOX) {
                     return false;
                 }
             }

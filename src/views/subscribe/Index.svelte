@@ -92,52 +92,17 @@
             return;
         }
 
+        const prevState = gameState;
         gameState = game.getState();
         currentLevel = game.getCurrentLevel();
         moves = game.getMoves();
         canUndo = game.canUndo();
 
-        // 检查是否获胜
-        checkWinCondition();
-    }
-
-    // 检查获胜条件
-    function checkWinCondition(): void {
-        if (game && game.getState() === GameState.WON) {
-            // 延迟一小会儿弹出，让玩家看清最后一跳
+        // 只在状态从非 WON 切换到 WON 时触发一次胜利弹窗，避免重复弹出
+        if (prevState !== GameState.WON && gameState === GameState.WON) {
             setTimeout(() => {
                 showWinModal = true;
                 playSound("win");
-                // 必须同步底层状态
-                gameState = GameState.FINISHED;
-            }, 300);
-        }
-        if (!game || gameState !== GameState.PLAYING) return;
-
-        const grid = game.getGrid();
-        let hasUnfinishedBox = false;
-
-        // 严谨校验：遍历整个网格
-        for (const row of grid) {
-            for (const cell of row) {
-                // 如果网格中还存在普通的 BOX（不在目标点上的箱子），则未完成
-                // 或者根据你的枚举逻辑，如果还存在普通的 TARGET（上面没有箱子），也可能未完成
-                if (cell === TileType.BOX) {
-                    hasUnfinishedBox = true;
-                    break;
-                }
-            }
-            if (hasUnfinishedBox) break;
-        }
-
-        // 如果没有“裸露”的箱子了，说明所有箱子都在目标点上（变成了 BOX_ON_TARGET）
-        if (!hasUnfinishedBox && moves > 0) {
-            // 延迟一小会儿弹出，让玩家看清最后一跳
-            setTimeout(() => {
-                showWinModal = true;
-                playSound("win");
-                // 必须同步底层状态
-                gameState = GameState.FINISHED;
             }, 300);
         }
     }
@@ -185,8 +150,10 @@
             return;
         }
 
+        showWinModal = false;
         game.reset();
         updateGameState();
+        forceRerender();
         playSound("reset");
     }
 
@@ -393,7 +360,7 @@
             <button
                 class="btn btn-reset"
                 on:click={handleReset}
-                disabled={!isPlaying}
+                disabled={gameState === GameState.IDLE}
             >
                 🔄 重置
             </button>
@@ -524,7 +491,7 @@
             <button
                 class="btn btn-level"
                 on:click={handlePrevLevel}
-                disabled={currentLevel <= 0 || !isPlaying}
+                disabled={currentLevel <= 0 || gameState === GameState.IDLE}
             >
                 ⬅️ 上一关
             </button>
@@ -532,7 +499,8 @@
             <button
                 class="btn btn-level"
                 on:click={handleNextLevel}
-                disabled={currentLevel >= levels.length - 1 || !isPlaying}
+                disabled={currentLevel >= levels.length - 1 ||
+                    gameState === GameState.IDLE}
             >
                 下一关 ➡️
             </button>
@@ -542,7 +510,18 @@
 
 <!-- 胜利弹窗 -->
 {#if showWinModal}
-    <div class="modal-overlay" on:click={() => (showWinModal = false)}>
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <div
+        class="modal-overlay"
+        role="dialog"
+        aria-modal="true"
+        aria-label="过关提示"
+        on:click={() => (showWinModal = false)}
+        on:keydown={(e) => e.key === "Escape" && (showWinModal = false)}
+    >
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
         <div class="modal-content" on:click={(e) => e.stopPropagation()}>
             <div class="modal-header">
                 <h2>🎉 恭喜过关！</h2>
