@@ -13,29 +13,39 @@
     interface Post {
         id: number;
         title: string;
-        date: string;
-        excerpt: string;
+        summary: string;
         content: string;
         link: string;
-        readTime?: number;
+        readtimes?: number;
+        updatedAt: string;
     }
 
     // === 临时硬编码详情数据（服务器修复后可删除）===
-    let post: Post | null = {
-        id: 1,
-        title: "欢迎来到我的博客空间",
-        date: new Date().toISOString(),
-        excerpt: "这里记录我的思考、学习笔记和生活点滴。感谢你的到来！",
-        content: `
-            <p>你好！我是 why128，很高兴你能来到这里。</p>
-            <p>这个博客是我用 Svelte + Supabase 搭建的个人空间，未来会持续分享技术文章、日常随笔和一些有趣的项目。</p>
-            <p>如果你有任何想法或建议，欢迎随时留言交流～</p>
-            <p>祝你阅读愉快！</p>
-        `,
-        link: "/detail",
-        readTime: 5,
-    };
-
+    let post: Post | null = null;
+    //新请求服务器
+    async function getData(id: number) {
+        loading = true;
+        try {
+            const response = await fetch(`https://a.aws.wattley.top/home/api/v1/articles/${id}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const result = await response.json();
+            post = {
+                id: result.id,
+                title: result.title,
+                summary: result.summary || result.content.slice(0, 100) + "...",
+                content: result.content,
+                link: result.link,
+                readtimes: result.readtimes,
+                updatedAt: formatTime(result.updatedAt),
+            };
+        } catch (error) {
+            console.error("请求失败 (Error)", error);
+        } finally {
+            loading = false;
+        }
+    }
     // === 原 Supabase 请求逻辑（已注释，服务器恢复后取消注释即可）===
     /*
     import supabase from "$lib/supabase";
@@ -67,7 +77,7 @@
 
     onMount(() => {
         // 查询当前的博客日志（暂时使用硬编码）
-        // getData(Number(params.id));
+        getData(Number(params.id));
         loading = false;
     });
 
@@ -88,10 +98,10 @@
                 >
             </h2>
             <div class="sub-title">
-                <p class="date">发布时间: {formatTime(post?.date)}</p>
-                <p class="readtime">查阅次数: {Number(post?.readTime) + 1}</p>
+                <p class="date">发布时间: {formatTime(post?.updatedAt)}</p>
+                <p class="readtime">查阅次数: {Number(post?.readtimes) + 1}</p>
             </div>
-            <div class="content-html">{@html post?.content}</div>
+            <div class="content-html">{@html post?.content.replaceAll(/\\n/g, '<br>')}</div>
         {/if}
     </div>
 </div>
