@@ -144,7 +144,7 @@
         white-space: pre-wrap;
         word-wrap: break-word;
     }
-    .content-html img{
+    .content-html :global(img){
         display: block;
         margin: 0 auto;
         max-width: 100%;
