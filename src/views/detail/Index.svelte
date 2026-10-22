@@ -144,4 +144,10 @@
         white-space: pre-wrap;
         word-wrap: break-word;
     }
+    .content-html img{
+        display: block;
+        margin: 0 auto;
+        max-width: 100%;
+        height: auto;
+    }
 </style>
