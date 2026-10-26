@@ -146,7 +146,7 @@
     }
     .content-html :global(img){
         display: block;
-        margin: 0 auto;
+        margin: 20px 0;
         max-width: 100%;
         height: auto;
     }
