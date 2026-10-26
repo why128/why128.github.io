@@ -32,7 +32,7 @@
     async function getData(page: number, pageSize: number) {
         loading = true;
         try {
-            const response = await fetch(`https://a.aws.wattley.top/home/api/v1/articles?page=${page}&pageSize=${pageSize}`);
+            const response = await fetch(`https://a.aws.wattley.top/home/api/v1/articles?page=${page}&pageSize=${pageSize}&status=1`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
