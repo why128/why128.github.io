@@ -40,7 +40,7 @@
             posts = result.list.map((v: Post) => ({
                 id: v.id,
                 title: v.title,
-                summary: v.summary || v.content.slice(0, 100) + "...",
+                summary: v.summary,
                 link: v.link,
                 readtimes: v.readtimes,
                 updatedAt: formatTime(v.updatedAt),
